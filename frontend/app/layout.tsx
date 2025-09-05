@@ -33,8 +33,8 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body className="font-sans antialiased">
         <AuthProvider>
-          {children}
-          <Toaster />
+            {children}
+            <Toaster />
         </AuthProvider>
       </body>
     </html>

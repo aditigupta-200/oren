@@ -57,7 +57,7 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
+                    className="relative h-8 w-8 rounded-full text-gray-600 hover:text-green-600 hover:bg-green-50"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="bg-green-100 text-green-600">
@@ -70,29 +70,42 @@ export function Navbar() {
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
                       <p className="font-medium">{user.name}</p>
-                      <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      <p className="w-[200px] truncate text-sm text-muted-foreground text-gray-600">
                         {user.email}
                       </p>
                     </div>
                   </div>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                    <Link
+                      href="/profile"
+                      className="cursor-pointer text-gray-600"
+                    >
+                      <User className="mr-2 h-4 w-4 text-gray-600" />
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={logout} className="cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer text-gray-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4 text-gray-600" />
                     Log out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
-                <Button variant="ghost" asChild>
+                <Button
+                  variant="ghost"
+                  className="text-gray-600 hover:text-green-600 hover:bg-green-50"
+                  asChild
+                >
                   <Link href="/login">Sign In</Link>
                 </Button>
-                <Button className="btn-primary" asChild>
+                <Button
+                  className="bg-green-600 text-white hover:bg-green-700"
+                  asChild
+                >
                   <Link href="/register">Sign Up</Link>
                 </Button>
               </div>

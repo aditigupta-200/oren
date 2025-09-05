@@ -34,12 +34,21 @@ export default function HomePage() {
             progress, and create professional reports.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="btn-primary" asChild>
+            <Button
+              size="lg"
+              className="bg-green-600 text-white hover:bg-green-700"
+              asChild
+            >
               <Link href="/register">
                 Get Started <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-green-600 text-green-600 hover:bg-green-50"
+              asChild
+            >
               <Link href="/login">Sign In</Link>
             </Button>
           </div>
@@ -54,39 +63,45 @@ export default function HomePage() {
           </h2>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center">
+            <Card className="text-center border-2 hover:border-green-600 hover:shadow-lg transition-all">
               <CardHeader>
                 <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Leaf className="h-6 w-6 text-green-600" />
                 </div>
-                <CardTitle>Environmental Metrics</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Environmental Metrics
+                </CardTitle>
+                <CardDescription className="text-gray-600 mt-2">
                   Track electricity consumption, renewable energy usage, fuel
                   consumption, and carbon emissions
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="text-center">
+            <Card className="text-center border-2 hover:border-blue-600 hover:shadow-lg transition-all">
               <CardHeader>
                 <div className="mx-auto w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-blue-600" />
                 </div>
-                <CardTitle>Social Impact</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Social Impact
+                </CardTitle>
+                <CardDescription className="text-gray-600 mt-2">
                   Monitor employee diversity, training hours, and community
                   investment initiatives
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="text-center">
+            <Card className="text-center border-2 hover:border-purple-600 hover:shadow-lg transition-all">
               <CardHeader>
                 <div className="mx-auto w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-purple-600" />
                 </div>
-                <CardTitle>Governance Standards</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Governance Standards
+                </CardTitle>
+                <CardDescription className="text-gray-600 mt-2">
                   Assess board independence, data privacy policies, and
                   corporate governance practices
                 </CardDescription>
@@ -105,37 +120,45 @@ export default function HomePage() {
                 Auto-calculated insights and real-time analytics
               </h3>
               <div className="space-y-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-3 hover:bg-green-50 rounded-lg transition-colors border border-gray-100 hover:border-green-200 shadow-sm">
                   <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Carbon Intensity Tracking</p>
+                    <p className="font-medium text-gray-900">
+                      Carbon Intensity Tracking
+                    </p>
                     <p className="text-sm text-gray-600">
                       Automatically calculate emissions per revenue unit
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-3 hover:bg-green-50 rounded-lg transition-colors border border-gray-100 hover:border-green-200 shadow-sm">
                   <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Renewable Energy Ratio</p>
+                    <p className="font-medium text-gray-900">
+                      Renewable Energy Ratio
+                    </p>
                     <p className="text-sm text-gray-600">
                       Monitor your clean energy adoption progress
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-3 hover:bg-green-50 rounded-lg transition-colors border border-gray-100 hover:border-green-200 shadow-sm">
                   <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Diversity Metrics</p>
+                    <p className="font-medium text-gray-900">
+                      Diversity Metrics
+                    </p>
                     <p className="text-sm text-gray-600">
                       Track workplace diversity and inclusion
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3 p-3 hover:bg-green-50 rounded-lg transition-colors border border-gray-100 hover:border-green-200 shadow-sm">
                   <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="font-medium">Community Impact</p>
+                    <p className="font-medium text-gray-900">
+                      Community Impact
+                    </p>
                     <p className="text-sm text-gray-600">
                       Measure community investment as percentage of revenue
                     </p>
@@ -167,7 +190,11 @@ export default function HomePage() {
             Join organizations worldwide in building a more sustainable future
             through comprehensive ESG reporting.
           </p>
-          <Button size="lg" className="btn-primary" asChild>
+          <Button
+            size="lg"
+            className="bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transition-all"
+            asChild
+          >
             <Link href="/register">
               Create Free Account <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

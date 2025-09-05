@@ -28,13 +28,13 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <div className="h-screen flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
         <Navbar />
-        <div className="flex items-center justify-center py-20">
-          <Card>
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
             <CardContent className="flex items-center gap-2 py-8">
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Loading dashboard...
+              <Loader2 className="h-5 w-5 animate-spin text-green-600" />
+              <span className="text-gray-700">Loading dashboard...</span>
             </CardContent>
           </Card>
         </div>
@@ -47,90 +47,108 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
       <Navbar />
-      <div className="py-8 px-4">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Welcome Header */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
-                Welcome back, {user.name}!
-              </CardTitle>
-              <CardDescription>
-                Manage your ESG reporting and track your sustainability progress
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild className="btn-primary">
-                  <Link href="/questionnaire">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Questionnaire
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/reports">
-                    <FileText className="mr-2 h-4 w-4" />
-                    View Reports
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Responses
+      <div className="flex-1 overflow-auto">
+        <div className="py-8 px-4">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {/* Welcome Header */}
+            <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900">
+                  Welcome back, {user.name}!
                 </CardTitle>
-                <BarChart3 className="h-4 w-4 text-green-600" />
+                <CardDescription className="text-gray-600">
+                  Manage your ESG reporting and track your sustainability
+                  progress
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">-</div>
-                <p className="text-xs text-muted-foreground">
-                  Across all years
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Latest Year
-                </CardTitle>
-                <FileText className="h-4 w-4 text-blue-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {new Date().getFullYear()}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    asChild
+                    className="bg-green-600 text-white hover:bg-green-700 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <Link href="/questionnaire">
+                      <Plus className="mr-2 h-4 w-4" />
+                      New Questionnaire
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    asChild
+                    className="border-2 border-green-200 hover:border-green-300 hover:bg-green-50"
+                  >
+                    <Link href="/reports">
+                      <FileText className="mr-2 h-4 w-4" />
+                      View Reports
+                    </Link>
+                  </Button>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Current financial year
-                </p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Account Status
+            {/* Quick Stats */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700">
+                    Total Responses
+                  </CardTitle>
+                  <BarChart3 className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">-</div>
+                  <p className="text-xs text-gray-500">Across all years</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700">
+                    Latest Year
+                  </CardTitle>
+                  <FileText className="h-4 w-4 text-blue-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {new Date().getFullYear()}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Current financial year
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-700">
+                    Account Status
+                  </CardTitle>
+                  <Users className="h-4 w-4 text-purple-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-gray-900">Active</div>
+                  <p className="text-xs text-gray-500">ESG reporting enabled</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Questionnaire History */}
+            <Card className="bg-white/95 backdrop-blur shadow-lg border-0">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Questionnaire History
                 </CardTitle>
-                <Users className="h-4 w-4 text-purple-600" />
+                <CardDescription className="text-gray-600">
+                  Your previous ESG questionnaire submissions
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">Active</div>
-                <p className="text-xs text-muted-foreground">
-                  ESG reporting enabled
-                </p>
+                <QuestionnaireHistory />
               </CardContent>
             </Card>
           </div>
-
-          {/* Questionnaire History */}
-          <QuestionnaireHistory />
         </div>
       </div>
     </div>
