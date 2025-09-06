@@ -1,12 +1,11 @@
 import express, { Request, Response } from "express"
 import bcrypt from "bcryptjs"
 import jwt, { type Secret } from "jsonwebtoken"
-import { PrismaClient } from "@prisma/client"
 import { body, validationResult } from "express-validator"
 import { authenticateToken, type AuthRequest } from "../middleware/auth"
+import { prisma } from "../lib/prisma"
 
 const router = express.Router()
-const prisma = new PrismaClient()
 
 // Register
 router.post(
