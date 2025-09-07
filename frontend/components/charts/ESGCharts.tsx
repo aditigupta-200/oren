@@ -54,36 +54,7 @@ interface TooltipProps {
   label?: string;
 }
 
-interface AutoCalculated {
-  carbonIntensity?: number;
-  renewableElectricityRatio?: number;
-  diversityRatio?: number;
-  communitySpendRatio?: number;
-}
-
-interface ESGData {
-  autoCalculated?: AutoCalculated;
-  carbonEmissions?: number;
-  totalElectricityConsumption?: number;
-  renewableElectricityConsumption?: number;
-  totalFuelConsumption?: number;
-  totalEmployees?: number;
-  femaleEmployees?: number;
-  averageTrainingHours?: number;
-  communityInvestmentSpend?: number;
-  independentBoardMembers?: number;
-  totalRevenue?: number;
-  hasDataPrivacyPolicy?: string;
-  [key: string]: unknown;
-}
-
-interface ESGResponse {
-  id: string;
-  financialYear: string;
-  data: ESGData;
-  createdAt: string;
-  updatedAt: string;
-}
+import { ESGResponse } from "@/types/esg";
 
 interface ESGChartsProps {
   responses: ESGResponse[];
@@ -123,7 +94,7 @@ export function ESGCharts({ responses }: ESGChartsProps) {
   // Prepare data for charts
   const prepareChartData = () => {
     return responses
-      .sort((a, b) => parseInt(a.financialYear) - parseInt(b.financialYear))
+      .sort((a, b) => a.financialYear - b.financialYear)
       .map((response) => ({
         year: response.financialYear,
         // Environmental metrics
