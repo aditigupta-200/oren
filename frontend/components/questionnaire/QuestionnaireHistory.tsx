@@ -24,7 +24,8 @@ interface ESGResponse {
   updatedAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://oren-nror.onrender.com";
 
 export function QuestionnaireHistory() {
   const [responses, setResponses] = useState<ESGResponse[]>([]);

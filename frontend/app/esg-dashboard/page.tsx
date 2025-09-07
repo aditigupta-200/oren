@@ -38,7 +38,7 @@ export default function ESGDashboardPage() {
         }
 
         const response = await fetch(
-          "http://localhost:4000/api/esg/responses",
+          "https://oren-nror.onrender.com/api/esg/responses",
           {
             headers: {
               Authorization: `Bearer ${token}`,
