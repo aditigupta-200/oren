@@ -14,11 +14,9 @@ export default function QuestionnairePage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      if (router.pathname !== "/login") {
-        router.push("/login");
-      }
+      router.push("/login");
     }
-  }, [ user, router]); // Prevent repeated router.push calls
+  }, [user, loading, router]);
 
   if (loading) {
     return (

@@ -365,13 +365,17 @@ export function ExportButtons({ responses, userName }: ExportButtonsProps) {
               nextYear.data.totalEmployees as number
             ),
             "Diversity Change (%)": calculatePercentageChange(
-              currentYear.data.femaleEmployees !== undefined && currentYear.data.totalEmployees !== undefined
+              currentYear.data.femaleEmployees !== undefined &&
+                currentYear.data.totalEmployees !== undefined
                 ? ((currentYear.data.femaleEmployees || 0) /
-                    (currentYear.data.totalEmployees || 1)) * 100
+                    (currentYear.data.totalEmployees || 1)) *
+                    100
                 : null,
-              nextYear.data.femaleEmployees !== undefined && nextYear.data.totalEmployees !== undefined
+              nextYear.data.femaleEmployees !== undefined &&
+                nextYear.data.totalEmployees !== undefined
                 ? ((nextYear.data.femaleEmployees || 0) /
-                    (nextYear.data.totalEmployees || 1)) * 100
+                    (nextYear.data.totalEmployees || 1)) *
+                    100
                 : null
             ),
 
@@ -399,7 +403,8 @@ export function ExportButtons({ responses, userName }: ExportButtonsProps) {
             ),
             "Peak Renewable Ratio (%)": max(
               responses.map((r) =>
-                isAutoCalculated(r.data.autoCalculated) && r.data.autoCalculated.renewableElectricityRatio !== undefined
+                isAutoCalculated(r.data.autoCalculated) &&
+                r.data.autoCalculated.renewableElectricityRatio !== undefined
                   ? r.data.autoCalculated.renewableElectricityRatio
                   : null
               )
