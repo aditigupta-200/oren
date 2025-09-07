@@ -30,7 +30,6 @@ import {
   Shield,
   CheckCircle,
   AlertCircle,
-  TrendingUp,
   Zap,
   Target,
   Calendar,
@@ -74,10 +73,10 @@ const validationMessages = {
   positive: "Value must be greater than 0",
   relationship: {
     renewable: "Renewable energy cannot exceed total electricity",
-    employees: "Female employees cannot exceed total employees"
+    employees: "Female employees cannot exceed total employees",
   },
   range: "Value must be between 0 and 100",
-  format: "Please enter a valid 4-digit year"
+  format: "Please enter a valid 4-digit year",
 };
 
 // Maximum boundary values
@@ -85,7 +84,7 @@ const maxValues = {
   employees: 1000000,
   electricity: 1000000000,
   revenue: 1000000000000,
-  training: 1000
+  training: 1000,
 };
 
 // Validation state interface
@@ -100,7 +99,9 @@ export function ESGForm() {
     new Date().getFullYear()
   );
   const [metrics, setMetrics] = useState<ESGMetrics>({});
-  const [autoCalculated, setAutoCalculated] = useState<AutoCalculatedMetrics>({});
+  const [autoCalculated, setAutoCalculated] = useState<AutoCalculatedMetrics>(
+    {}
+  );
   const [validationErrors, setValidationErrors] = useState<ValidationState>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -119,15 +120,18 @@ export function ESGForm() {
     independentBoardMembers: "Independent Board Members",
     hasDataPrivacyPolicy: "Data Privacy Policy",
     totalRevenue: "Total Revenue",
-    autoCalculated: "Auto-calculated Metrics" // Add this line
+    autoCalculated: "Auto-calculated Metrics", // Add this line
   };
 
-  const validateField = (field: keyof ESGMetrics, value: number | string): string | undefined => {
+  const validateField = (
+    field: keyof ESGMetrics,
+    value: number | string
+  ): string | undefined => {
     // Skip validation for non-input fields
-    if (field === 'autoCalculated') return;
-    
+    if (field === "autoCalculated") return;
+
     if (value === undefined || value === "") return;
-    
+
     // Handle Data Privacy Policy separately as it's not a number
     if (field === "hasDataPrivacyPolicy") {
       if (!value || !["Yes", "No"].includes(value as string)) {
@@ -137,38 +141,47 @@ export function ESGForm() {
     }
 
     const numValue = typeof value === "string" ? parseFloat(value) : value;
-    
+
     // Basic validation
-    if (isNaN(numValue)) return `${fieldLabels[field]}: Please enter a valid number`;
+    if (isNaN(numValue))
+      return `${fieldLabels[field]}: Please enter a valid number`;
     if (numValue < 0) return `${fieldLabels[field]} must be greater than 0`;
-    
+
     // Maximum boundary validation
-    switch(field) {
+    switch (field) {
       case "totalEmployees":
       case "femaleEmployees":
-        if (numValue > maxValues.employees) return `Value cannot exceed ${maxValues.employees}`;
+        if (numValue > maxValues.employees)
+          return `Value cannot exceed ${maxValues.employees}`;
         break;
       case "totalElectricityConsumption":
       case "renewableElectricityConsumption":
-        if (numValue > maxValues.electricity) return `Value cannot exceed ${maxValues.electricity}`;
+        if (numValue > maxValues.electricity)
+          return `Value cannot exceed ${maxValues.electricity}`;
         break;
       case "totalRevenue":
-        if (numValue > maxValues.revenue) return `Value cannot exceed ${maxValues.revenue}`;
+        if (numValue > maxValues.revenue)
+          return `Value cannot exceed ${maxValues.revenue}`;
         break;
       case "averageTrainingHours":
-        if (numValue > maxValues.training) return `Value cannot exceed ${maxValues.training}`;
+        if (numValue > maxValues.training)
+          return `Value cannot exceed ${maxValues.training}`;
         break;
     }
-    
+
     // Relationship validation
-    if (field === "renewableElectricityConsumption" && 
-        metrics.totalElectricityConsumption && 
-        numValue > metrics.totalElectricityConsumption) {
+    if (
+      field === "renewableElectricityConsumption" &&
+      metrics.totalElectricityConsumption &&
+      numValue > metrics.totalElectricityConsumption
+    ) {
       return validationMessages.relationship.renewable;
     }
-    if (field === "femaleEmployees" && 
-        metrics.totalEmployees && 
-        numValue > metrics.totalEmployees) {
+    if (
+      field === "femaleEmployees" &&
+      metrics.totalEmployees &&
+      numValue > metrics.totalEmployees
+    ) {
       return validationMessages.relationship.employees;
     }
     if (field === "independentBoardMembers" && numValue > 100) {
@@ -326,17 +339,17 @@ export function ESGForm() {
     value: string | number
   ) => {
     // Clear previous validation error for this field
-    setValidationErrors(prev => ({
+    setValidationErrors((prev) => ({
       ...prev,
-      [field]: undefined
+      [field]: undefined,
     }));
 
     // Validate the new value
     const validationError = validateField(field, value);
     if (validationError) {
-      setValidationErrors(prev => ({
+      setValidationErrors((prev) => ({
         ...prev,
-        [field]: validationError
+        [field]: validationError,
       }));
       return;
     }
@@ -356,7 +369,7 @@ export function ESGForm() {
     const newValidationErrors: ValidationState = {};
     let hasErrors = false;
     let errorMessages: string[] = [];
-    
+
     // Define field labels for better error messages
     const fieldLabels: Record<keyof ESGMetrics, string> = {
       totalElectricityConsumption: "Total Electricity Consumption",
@@ -369,36 +382,54 @@ export function ESGForm() {
       communityInvestmentSpend: "Community Investment",
       independentBoardMembers: "Independent Board Members",
       hasDataPrivacyPolicy: "Data Privacy Policy",
-      totalRevenue: "Total Revenue"
+      totalRevenue: "Total Revenue",
     };
 
     // Required fields check with categories
     const requiredFields: (keyof ESGMetrics)[] = [
       "totalElectricityConsumption",
       "totalEmployees",
-      "totalRevenue"
+      "totalRevenue",
     ];
 
     // Check required fields first with categorized errors
-    const missingFields: { environmental: string[], social: string[], governance: string[] } = {
+    const missingFields: {
+      environmental: string[];
+      social: string[];
+      governance: string[];
+    } = {
       environmental: [],
       social: [],
-      governance: []
+      governance: [],
     };
 
-    requiredFields.forEach(field => {
+    requiredFields.forEach((field) => {
       if (!metrics[field]) {
         newValidationErrors[field] = "This field is required";
-        
+
         // Categorize missing fields
-        if (["totalElectricityConsumption", "renewableElectricityConsumption", "totalFuelConsumption", "carbonEmissions"].includes(field)) {
+        if (
+          [
+            "totalElectricityConsumption",
+            "renewableElectricityConsumption",
+            "totalFuelConsumption",
+            "carbonEmissions",
+          ].includes(field)
+        ) {
           missingFields.environmental.push(fieldLabels[field]);
-        } else if (["totalEmployees", "femaleEmployees", "averageTrainingHours", "communityInvestmentSpend"].includes(field)) {
+        } else if (
+          [
+            "totalEmployees",
+            "femaleEmployees",
+            "averageTrainingHours",
+            "communityInvestmentSpend",
+          ].includes(field)
+        ) {
           missingFields.social.push(fieldLabels[field]);
         } else {
           missingFields.governance.push(fieldLabels[field]);
         }
-        
+
         hasErrors = true;
       }
     });
@@ -408,23 +439,40 @@ export function ESGForm() {
       environmental: [] as string[],
       social: [] as string[],
       governance: [] as string[],
-      relationships: [] as string[]
+      relationships: [] as string[],
     };
 
     Object.entries(metrics).forEach(([field, value]) => {
       // Skip autoCalculated field as it's not a direct input field
-      if (field === 'autoCalculated') return;
-      
+      if (field === "autoCalculated") return;
+
       if (value !== undefined && value !== "") {
-        const error = validateField(field as keyof ESGMetrics, value as number | string);
+        const error = validateField(
+          field as keyof ESGMetrics,
+          value as number | string
+        );
         if (error) {
           newValidationErrors[field] = error;
           const fieldName = fieldLabels[field as keyof ESGMetrics];
-          
+
           // Categorize validation errors
-          if (["totalElectricityConsumption", "renewableElectricityConsumption", "totalFuelConsumption", "carbonEmissions"].includes(field)) {
+          if (
+            [
+              "totalElectricityConsumption",
+              "renewableElectricityConsumption",
+              "totalFuelConsumption",
+              "carbonEmissions",
+            ].includes(field)
+          ) {
             validationIssues.environmental.push(error);
-          } else if (["totalEmployees", "femaleEmployees", "averageTrainingHours", "communityInvestmentSpend"].includes(field)) {
+          } else if (
+            [
+              "totalEmployees",
+              "femaleEmployees",
+              "averageTrainingHours",
+              "communityInvestmentSpend",
+            ].includes(field)
+          ) {
             validationIssues.social.push(error);
           } else {
             validationIssues.governance.push(error);
@@ -434,7 +482,7 @@ export function ESGForm() {
           if (error.includes("cannot exceed")) {
             validationIssues.relationships.push(`${fieldName}: ${error}`);
           }
-          
+
           hasErrors = true;
         }
       }
@@ -443,43 +491,63 @@ export function ESGForm() {
     if (hasErrors) {
       setValidationErrors(newValidationErrors);
       setIsSaving(false);
-      
+
       // Detailed console logging
       console.log("ESG Validation Summary:", {
         missingRequiredFields: missingFields,
         validationIssues: validationIssues,
-        allErrors: newValidationErrors
+        allErrors: newValidationErrors,
       });
 
       // Build a user-friendly error message
       const errorSections: string[] = [];
-      
+
       // Add missing required fields
       if (missingFields.environmental.length > 0) {
-        errorSections.push(`Missing Environmental Data: ${missingFields.environmental.join(", ")}`);
+        errorSections.push(
+          `Missing Environmental Data: ${missingFields.environmental.join(
+            ", "
+          )}`
+        );
       }
       if (missingFields.social.length > 0) {
-        errorSections.push(`Missing Social Data: ${missingFields.social.join(", ")}`);
+        errorSections.push(
+          `Missing Social Data: ${missingFields.social.join(", ")}`
+        );
       }
       if (missingFields.governance.length > 0) {
-        errorSections.push(`Missing Governance Data: ${missingFields.governance.join(", ")}`);
+        errorSections.push(
+          `Missing Governance Data: ${missingFields.governance.join(", ")}`
+        );
       }
 
       // Add validation issues
       if (validationIssues.relationships.length > 0) {
-        errorSections.push(`Relationship Errors: ${validationIssues.relationships.join(", ")}`);
+        errorSections.push(
+          `Relationship Errors: ${validationIssues.relationships.join(", ")}`
+        );
       }
       if (validationIssues.environmental.length > 0) {
-        errorSections.push(`Environmental Issues:\n- ${validationIssues.environmental.join("\n- ")}`);
+        errorSections.push(
+          `Environmental Issues:\n- ${validationIssues.environmental.join(
+            "\n- "
+          )}`
+        );
       }
       if (validationIssues.social.length > 0) {
-        errorSections.push(`Social Issues:\n- ${validationIssues.social.join("\n- ")}`);
+        errorSections.push(
+          `Social Issues:\n- ${validationIssues.social.join("\n- ")}`
+        );
       }
       if (validationIssues.governance.length > 0) {
-        errorSections.push(`Governance Issues:\n- ${validationIssues.governance.join("\n- ")}`);
+        errorSections.push(
+          `Governance Issues:\n- ${validationIssues.governance.join("\n- ")}`
+        );
       }
 
-      const errorSummary = `Please fix the following issues:\n${errorSections.join("\n")}`;
+      const errorSummary = `Please fix the following issues:\n${errorSections.join(
+        "\n"
+      )}`;
       setError(errorSummary);
       notify("Validation errors found. Check the form for details.", "error");
       return;
@@ -791,8 +859,8 @@ export function ESGForm() {
                           )
                         }
                         className={`h-12 text-lg border-2 transition-colors ${
-                          validationErrors.totalElectricityConsumption 
-                            ? "border-red-400 focus:border-red-500" 
+                          validationErrors.totalElectricityConsumption
+                            ? "border-red-400 focus:border-red-500"
                             : "border-gray-300 focus:border-emerald-400"
                         }`}
                       />
@@ -1429,7 +1497,6 @@ export function ESGForm() {
                         Well Governed
                       </Badge>
                     </div>
-
                   </div>
                 </div>
               </div>
