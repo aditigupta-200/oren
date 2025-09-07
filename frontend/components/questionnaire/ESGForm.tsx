@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +30,6 @@ import {
   Shield,
   CheckCircle,
   AlertCircle,
-  TrendingUp,
   Zap,
   Target,
   Calendar,
@@ -60,6 +58,23 @@ interface ESGMetrics {
   totalRevenue?: number;
 }
 
+const validationMessages = {
+  required: "This field is required",
+  positive: "Value must be greater than 0",
+  relationship: "Renewable energy cannot exceed total electricity",
+  range: "Value must be between 0 and 100",
+  format: "Please enter a valid 4-digit year",
+  femaleEmployees: "Number of female employees cannot exceed total employees",
+  carbonEmissions: "Carbon emissions must be greater than 0",
+  totalRevenue: "Total revenue must be greater than 0",
+  boardIndependence: "Board independence must be between 0 and 100%",
+};
+
+interface ValidationError {
+  field: keyof ESGMetrics;
+  message: string;
+}
+
 interface AutoCalculatedMetrics {
   carbonIntensity?: number;
   renewableElectricityRatio?: number;
@@ -77,13 +92,72 @@ export function ESGForm() {
   const [autoCalculated, setAutoCalculated] = useState<AutoCalculatedMetrics>(
     {}
   );
-  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>(
+    []
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [completionScore, setCompletionScore] = useState(0);
   const { user } = useAuth();
   const { notify } = useToast();
+
+  const validateField = useCallback(
+    (
+      field: keyof ESGMetrics,
+      value: number | undefined
+    ): ValidationError | null => {
+      if (value === undefined || value === null) return null;
+
+      switch (field) {
+        case "totalElectricityConsumption":
+          if (value <= 0)
+            return { field, message: validationMessages.positive };
+          break;
+
+        case "renewableElectricityConsumption":
+          if (value <= 0)
+            return { field, message: validationMessages.positive };
+          if (
+            metrics.totalElectricityConsumption &&
+            value > metrics.totalElectricityConsumption
+          ) {
+            return { field, message: validationMessages.relationship };
+          }
+          break;
+
+        case "carbonEmissions":
+          if (value <= 0)
+            return { field, message: validationMessages.carbonEmissions };
+          break;
+
+        case "totalEmployees":
+          if (value <= 0)
+            return { field, message: validationMessages.positive };
+          break;
+
+        case "femaleEmployees":
+          if (value < 0) return { field, message: validationMessages.positive };
+          if (metrics.totalEmployees && value > metrics.totalEmployees) {
+            return { field, message: validationMessages.femaleEmployees };
+          }
+          break;
+
+        case "independentBoardMembers":
+          if (value < 0 || value > 100)
+            return { field, message: validationMessages.boardIndependence };
+          break;
+
+        case "totalRevenue":
+          if (value <= 0)
+            return { field, message: validationMessages.totalRevenue };
+          break;
+      }
+
+      return null;
+    },
+    [metrics]
+  );
 
   // Generate year options (current year and 10 years back)
   const yearOptions = Array.from(
@@ -129,49 +203,7 @@ export function ESGForm() {
     },
   ];
 
-  useEffect(() => {
-    if (financialYear) {
-      loadResponse(financialYear);
-    }
-  }, [financialYear]);
-
-  useEffect(() => {
-    calculateAutoMetrics();
-    calculateCompletionScore();
-  }, [metrics]);
-
-  const loadResponse = async (year: number) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/responses/${year}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(data.response.data || {});
-        setAutoCalculated(data.response.data?.autoCalculated || {});
-      } else if (response.status === 404) {
-        setMetrics({});
-        setAutoCalculated({});
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message || "Failed to load data");
-      } else {
-        setError("Failed to load data");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const calculateAutoMetrics = () => {
+  const calculateAutoMetrics = useCallback(() => {
     const calculated: AutoCalculatedMetrics = {};
 
     if (
@@ -213,9 +245,9 @@ export function ESGForm() {
     }
 
     setAutoCalculated(calculated);
-  };
+  }, [metrics]);
 
-  const calculateCompletionScore = () => {
+  const calculateCompletionScore = useCallback(() => {
     const totalFields = 11;
     const filledFields = Object.keys(metrics).filter(
       (key) =>
@@ -224,16 +256,145 @@ export function ESGForm() {
         metrics[key as keyof ESGMetrics] !== ""
     ).length;
     setCompletionScore(Math.round((filledFields / totalFields) * 100));
+  }, [metrics]);
+
+  const validateAll = useCallback(() => {
+    const errors: ValidationError[] = [];
+
+    // Validate all fields
+    Object.entries(metrics).forEach(([field, value]) => {
+      if (typeof value === "number") {
+        const error = validateField(field as keyof ESGMetrics, value);
+        if (error) {
+          errors.push(error);
+        }
+      }
+    });
+
+    setValidationErrors(errors);
+    return errors.length === 0;
+  }, [metrics, validateField]);
+
+  useEffect(() => {
+    if (financialYear) {
+      loadResponse(financialYear);
+    }
+  }, [financialYear]);
+
+  useEffect(() => {
+    console.log("Metrics updated:", metrics);
+
+    // Calculate auto metrics only if values change
+    const calculated: AutoCalculatedMetrics = {};
+
+    if (
+      metrics.carbonEmissions &&
+      metrics.totalRevenue &&
+      metrics.totalRevenue > 0
+    ) {
+      calculated.carbonIntensity =
+        metrics.carbonEmissions / metrics.totalRevenue;
+    }
+
+    if (
+      metrics.renewableElectricityConsumption &&
+      metrics.totalElectricityConsumption &&
+      metrics.totalElectricityConsumption > 0
+    ) {
+      calculated.renewableElectricityRatio =
+        (metrics.renewableElectricityConsumption /
+          metrics.totalElectricityConsumption) *
+        100;
+    }
+
+    if (
+      metrics.femaleEmployees &&
+      metrics.totalEmployees &&
+      metrics.totalEmployees > 0
+    ) {
+      calculated.diversityRatio =
+        (metrics.femaleEmployees / metrics.totalEmployees) * 100;
+    }
+
+    if (
+      metrics.communityInvestmentSpend &&
+      metrics.totalRevenue &&
+      metrics.totalRevenue > 0
+    ) {
+      calculated.communitySpendRatio =
+        (metrics.communityInvestmentSpend / metrics.totalRevenue) * 100;
+    }
+
+    if (JSON.stringify(calculated) !== JSON.stringify(autoCalculated)) {
+      setAutoCalculated(calculated);
+    }
+
+    // Calculate completion score only if it changes
+    const totalFields = 11;
+    const filledFields = Object.keys(metrics).filter(
+      (key) =>
+        metrics[key as keyof ESGMetrics] !== undefined &&
+        metrics[key as keyof ESGMetrics] !== null &&
+        metrics[key as keyof ESGMetrics] !== ""
+    ).length;
+    const newCompletionScore = Math.round((filledFields / totalFields) * 100);
+
+    if (newCompletionScore !== completionScore) {
+      setCompletionScore(newCompletionScore);
+    }
+  }, [metrics, autoCalculated, completionScore]);
+
+  const loadResponse = async (year: number) => {
+    setError("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_BASE_URL}/api/esg/responses/${year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setMetrics(data.response.data || {});
+        setAutoCalculated(data.response.data?.autoCalculated || {});
+      } else if (response.status === 404) {
+        setMetrics({});
+        setAutoCalculated({});
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message || "Failed to load data");
+      } else {
+        setError("Failed to load data");
+      }
+    }
   };
 
   const handleInputChange = (
     field: keyof ESGMetrics,
     value: string | number
   ) => {
+    const numericValue = value === "" ? undefined : Number(value);
+
+    // Validate the field immediately
+    const error =
+      numericValue !== undefined ? validateField(field, numericValue) : null;
+
     setMetrics((prev) => ({
       ...prev,
-      [field]: value === "" ? undefined : value,
+      [field]: numericValue,
     }));
+
+    // Update validation errors
+    setValidationErrors((prev) => {
+      const filtered = prev.filter((e) => e.field !== field);
+      return error ? [...filtered, error] : filtered;
+    });
   };
 
   const handleSave = async () => {
@@ -242,7 +403,7 @@ export function ESGForm() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/api/responses`, {
+      const response = await fetch(`${API_BASE_URL}/api/esg/responses`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -284,6 +445,18 @@ export function ESGForm() {
     return value.toFixed(decimals);
   };
 
+  const canMoveToNextStep = () => {
+    return validateAll();
+  };
+
+  const handleNextStep = () => {
+    if (validateAll()) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      notify("Please fix validation errors before proceeding", "error");
+    }
+  };
+
   const StepIndicator = () => (
     <Card className="glass-card enhanced-card border-0 shadow-xl animate-slide-down">
       <CardContent className="p-6">
@@ -295,7 +468,13 @@ export function ESGForm() {
                 flex items-center transition-all duration-300 cursor-pointer
                 ${index === currentStep ? "scale-110" : "hover:scale-105"}
               `}
-              onClick={() => setCurrentStep(index)}
+              onClick={() => {
+                if (index > currentStep && !canMoveToNextStep()) {
+                  notify(validationErrors.join(". "), "error");
+                  return;
+                }
+                setCurrentStep(index);
+              }}
             >
               <div
                 className={`
@@ -330,7 +509,7 @@ export function ESGForm() {
         </div>
         <div className="mt-4 bg-gray-200 rounded-full h-2">
           <div
-            className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-500"
+            className="progress-bar"
             style={{
               width: `${(currentStep / (formSteps.length - 1)) * 100}%`,
             }}
@@ -403,12 +582,30 @@ export function ESGForm() {
       {/* Step Indicator */}
       <StepIndicator />
 
-      {error && (
-        <div className="animate-slide-up">
-          <Alert className="border-red-200 bg-red-50 text-red-700">
-            <AlertCircle className="h-4 w-4" />
-            <span className="ml-2">{error}</span>
-          </Alert>
+      {(error || validationErrors.length > 0) && (
+        <div className="animate-slide-up space-y-2">
+          {error && (
+            <Alert className="border-red-200 bg-red-50 text-red-700">
+              <AlertCircle className="h-4 w-4" />
+              <span className="ml-2">{error}</span>
+            </Alert>
+          )}
+          {validationErrors.length > 0 && (
+            <Alert className="border-yellow-200 bg-yellow-50 text-yellow-700">
+              <AlertCircle className="h-4 w-4" />
+              <span className="ml-2">
+                Please fix the following errors:
+                <ul className="list-disc list-inside mt-1">
+                  {validationErrors.map((err, index) => (
+                    <li key={index}>
+                      <span className="font-medium">{err.field}:</span>{" "}
+                      {err.message}
+                    </li>
+                  ))}
+                </ul>
+              </span>
+            </Alert>
+          )}
         </div>
       )}
 
@@ -501,8 +698,7 @@ export function ESGForm() {
                   onClick={() => setCurrentStep(1)}
                   className="btn-gradient text-white px-8 py-3"
                 >
-                  Start Assessment
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  Start Assessment <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -528,14 +724,18 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up">
                   <Label
                     htmlFor="totalElectricityConsumption"
-                    className="font-semibold"
+                    className="font-semibold flex items-center gap-2"
                   >
                     Total electricity consumption
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for renewable ratio
+                    </Badge>
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="totalElectricityConsumption"
                       type="number"
+                      min="0"
                       placeholder="Enter consumption"
                       value={metrics.totalElectricityConsumption || ""}
                       onChange={(e) =>
@@ -558,14 +758,18 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-100">
                   <Label
                     htmlFor="renewableElectricityConsumption"
-                    className="font-semibold"
+                    className="font-semibold flex items-center gap-2"
                   >
                     Renewable electricity consumption
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for renewable ratio
+                    </Badge>
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="renewableElectricityConsumption"
                       type="number"
+                      min="0"
                       placeholder="Enter renewable consumption"
                       value={metrics.renewableElectricityConsumption || ""}
                       onChange={(e) =>
@@ -616,13 +820,20 @@ export function ESGForm() {
                 </div>
 
                 <div className="space-y-2 animate-slide-up animate-delay-300">
-                  <Label htmlFor="carbonEmissions" className="font-semibold">
+                  <Label
+                    htmlFor="carbonEmissions"
+                    className="font-semibold flex items-center gap-2"
+                  >
                     Carbon emissions
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for intensity
+                    </Badge>
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="carbonEmissions"
                       type="number"
+                      min="0"
                       placeholder="Enter emissions"
                       value={metrics.carbonEmissions || ""}
                       onChange={(e) =>
@@ -678,11 +889,21 @@ export function ESGForm() {
                   Previous
                 </Button>
                 <Button
-                  onClick={() => setCurrentStep(2)}
+                  onClick={handleNextStep}
                   className="btn-gradient text-white px-8"
+                  disabled={!canMoveToNextStep()}
                 >
-                  Next: Social Metrics
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {validationErrors.length > 0 ? (
+                    <>
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      Fix Validation Errors
+                    </>
+                  ) : (
+                    <>
+                      Next: Social Metrics
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -706,12 +927,22 @@ export function ESGForm() {
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2 animate-slide-up">
-                  <Label htmlFor="totalEmployees" className="font-semibold">
+                  <Label
+                    htmlFor="totalEmployees"
+                    className="font-semibold flex items-center gap-2"
+                  >
                     Total number of employees
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for diversity ratio
+                    </Badge>
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                      Must be greater than 0
+                    </Badge>
                   </Label>
                   <Input
                     id="totalEmployees"
                     type="number"
+                    min="1"
                     placeholder="Enter total employees"
                     value={metrics.totalEmployees || ""}
                     onChange={(e) =>
@@ -728,12 +959,19 @@ export function ESGForm() {
                 </div>
 
                 <div className="space-y-2 animate-slide-up animate-delay-100">
-                  <Label htmlFor="femaleEmployees" className="font-semibold">
+                  <Label
+                    htmlFor="femaleEmployees"
+                    className="font-semibold flex items-center gap-2"
+                  >
                     Number of female employees
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for diversity ratio
+                    </Badge>
                   </Label>
                   <Input
                     id="femaleEmployees"
                     type="number"
+                    min="0"
                     placeholder="Enter female employees"
                     value={metrics.femaleEmployees || ""}
                     onChange={(e) =>
@@ -777,14 +1015,18 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-300">
                   <Label
                     htmlFor="communityInvestmentSpend"
-                    className="font-semibold"
+                    className="font-semibold flex items-center gap-2"
                   >
                     Community investment spend
+                    <Badge className="bg-blue-100 text-blue-800">
+                      Required for community ratio
+                    </Badge>
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="communityInvestmentSpend"
                       type="number"
+                      min="0"
                       placeholder="Enter community spend"
                       value={metrics.communityInvestmentSpend || ""}
                       onChange={(e) =>
@@ -836,11 +1078,21 @@ export function ESGForm() {
                   Previous
                 </Button>
                 <Button
-                  onClick={() => setCurrentStep(3)}
+                  onClick={handleNextStep}
                   className="btn-gradient text-white px-8"
+                  disabled={!canMoveToNextStep()}
                 >
-                  Next: Governance
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {validationErrors.length > 0 ? (
+                    <>
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      Fix Validation Errors
+                    </>
+                  ) : (
+                    <>
+                      Next: Governance
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
@@ -926,14 +1178,24 @@ export function ESGForm() {
                 </div>
 
                 <div className="md:col-span-2 space-y-2 animate-slide-up animate-delay-200">
-                  <Label htmlFor="totalRevenue" className="font-semibold">
+                  <Label
+                    htmlFor="totalRevenue"
+                    className="font-semibold flex items-center gap-2"
+                  >
                     Total Revenue
+                    <Badge className="bg-red-100 text-red-800">
+                      Required for calculations
+                    </Badge>
+                    <Badge className="bg-yellow-100 text-yellow-800">
+                      Must be greater than 0
+                    </Badge>
                   </Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="totalRevenue"
                       type="number"
-                      placeholder="Enter total revenue"
+                      min="1"
+                      placeholder="Enter total revenue (must be greater than 0)"
                       value={metrics.totalRevenue || ""}
                       onChange={(e) =>
                         handleInputChange(
@@ -983,11 +1245,21 @@ export function ESGForm() {
                   Previous
                 </Button>
                 <Button
-                  onClick={() => setCurrentStep(4)}
+                  onClick={handleNextStep}
                   className="btn-gradient text-white px-8"
+                  disabled={!canMoveToNextStep()}
                 >
-                  Review & Submit
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  {validationErrors.length > 0 ? (
+                    <>
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      Fix Validation Errors
+                    </>
+                  ) : (
+                    <>
+                      Review & Submit
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>

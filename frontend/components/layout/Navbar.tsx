@@ -50,6 +50,12 @@ export function Navbar() {
                 >
                   Reports
                 </Link>
+                <Link
+                  href="/esg-dashboard"
+                  className="text-gray-600 hover:text-green-600 font-medium transition-colors px-3 py-2 rounded-md hover:bg-green-50"
+                >
+                  ESG Dashboard
+                </Link>
               </div>
             )}
           </div>

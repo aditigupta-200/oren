@@ -1,10 +1,9 @@
 import express, { Request, Response } from "express"
-import { PrismaClient } from "@prisma/client"
 import { body, validationResult } from "express-validator"
 import { authenticateToken, type AuthRequest } from "../middleware/auth"
+import { prisma } from "../lib/prisma"
 
 const router = express.Router()
-const prisma = new PrismaClient()
 
 // All routes require authentication
 router.use(authenticateToken)

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -80,7 +79,7 @@ interface ESGData {
 
 interface ESGResponse {
   id: string;
-  financialYear: number;
+  financialYear: string;
   data: ESGData;
   createdAt: string;
   updatedAt: string;
@@ -124,7 +123,7 @@ export function ESGCharts({ responses }: ESGChartsProps) {
   // Prepare data for charts
   const prepareChartData = () => {
     return responses
-      .sort((a, b) => a.financialYear - b.financialYear)
+      .sort((a, b) => parseInt(a.financialYear) - parseInt(b.financialYear))
       .map((response) => ({
         year: response.financialYear,
         // Environmental metrics
