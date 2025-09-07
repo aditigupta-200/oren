@@ -57,6 +57,8 @@ interface ESGMetrics {
   independentBoardMembers?: number;
   hasDataPrivacyPolicy?: "Yes" | "No" | "";
   totalRevenue?: number;
+  // Exclude autoCalculated from validation
+  autoCalculated?: AutoCalculatedMetrics;
 }
 
 interface AutoCalculatedMetrics {
@@ -66,6 +68,31 @@ interface AutoCalculatedMetrics {
   communitySpendRatio?: number;
 }
 
+// Validation messages
+const validationMessages = {
+  required: "This field is required",
+  positive: "Value must be greater than 0",
+  relationship: {
+    renewable: "Renewable energy cannot exceed total electricity",
+    employees: "Female employees cannot exceed total employees"
+  },
+  range: "Value must be between 0 and 100",
+  format: "Please enter a valid 4-digit year"
+};
+
+// Maximum boundary values
+const maxValues = {
+  employees: 1000000,
+  electricity: 1000000000,
+  revenue: 1000000000000,
+  training: 1000
+};
+
+// Validation state interface
+interface ValidationState {
+  [key: string]: string | undefined;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export function ESGForm() {
@@ -73,12 +100,81 @@ export function ESGForm() {
     new Date().getFullYear()
   );
   const [metrics, setMetrics] = useState<ESGMetrics>({});
-  const [autoCalculated, setAutoCalculated] = useState<AutoCalculatedMetrics>(
-    {}
-  );
+  const [autoCalculated, setAutoCalculated] = useState<AutoCalculatedMetrics>({});
+  const [validationErrors, setValidationErrors] = useState<ValidationState>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Field labels for validation messages
+  const fieldLabels: Record<keyof ESGMetrics, string> = {
+    totalElectricityConsumption: "Total Electricity Consumption",
+    renewableElectricityConsumption: "Renewable Electricity",
+    totalFuelConsumption: "Total Fuel Consumption",
+    carbonEmissions: "Carbon Emissions",
+    totalEmployees: "Total Employees",
+    femaleEmployees: "Female Employees",
+    averageTrainingHours: "Average Training Hours",
+    communityInvestmentSpend: "Community Investment",
+    independentBoardMembers: "Independent Board Members",
+    hasDataPrivacyPolicy: "Data Privacy Policy",
+    totalRevenue: "Total Revenue",
+    autoCalculated: "Auto-calculated Metrics" // Add this line
+  };
+
+  const validateField = (field: keyof ESGMetrics, value: number | string): string | undefined => {
+    // Skip validation for non-input fields
+    if (field === 'autoCalculated') return;
+    
+    if (value === undefined || value === "") return;
+    
+    // Handle Data Privacy Policy separately as it's not a number
+    if (field === "hasDataPrivacyPolicy") {
+      if (!value || !["Yes", "No"].includes(value as string)) {
+        return `${fieldLabels[field]}: Please select Yes or No`;
+      }
+      return;
+    }
+
+    const numValue = typeof value === "string" ? parseFloat(value) : value;
+    
+    // Basic validation
+    if (isNaN(numValue)) return `${fieldLabels[field]}: Please enter a valid number`;
+    if (numValue < 0) return `${fieldLabels[field]} must be greater than 0`;
+    
+    // Maximum boundary validation
+    switch(field) {
+      case "totalEmployees":
+      case "femaleEmployees":
+        if (numValue > maxValues.employees) return `Value cannot exceed ${maxValues.employees}`;
+        break;
+      case "totalElectricityConsumption":
+      case "renewableElectricityConsumption":
+        if (numValue > maxValues.electricity) return `Value cannot exceed ${maxValues.electricity}`;
+        break;
+      case "totalRevenue":
+        if (numValue > maxValues.revenue) return `Value cannot exceed ${maxValues.revenue}`;
+        break;
+      case "averageTrainingHours":
+        if (numValue > maxValues.training) return `Value cannot exceed ${maxValues.training}`;
+        break;
+    }
+    
+    // Relationship validation
+    if (field === "renewableElectricityConsumption" && 
+        metrics.totalElectricityConsumption && 
+        numValue > metrics.totalElectricityConsumption) {
+      return validationMessages.relationship.renewable;
+    }
+    if (field === "femaleEmployees" && 
+        metrics.totalEmployees && 
+        numValue > metrics.totalEmployees) {
+      return validationMessages.relationship.employees;
+    }
+    if (field === "independentBoardMembers" && numValue > 100) {
+      return validationMessages.range;
+    }
+  };
   const [currentStep, setCurrentStep] = useState(0);
   const [completionScore, setCompletionScore] = useState(0);
   const { user } = useAuth();
@@ -229,6 +325,23 @@ export function ESGForm() {
     field: keyof ESGMetrics,
     value: string | number
   ) => {
+    // Clear previous validation error for this field
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: undefined
+    }));
+
+    // Validate the new value
+    const validationError = validateField(field, value);
+    if (validationError) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: validationError
+      }));
+      return;
+    }
+
+    // Update metrics if validation passes
     setMetrics((prev) => ({
       ...prev,
       [field]: value === "" ? undefined : value,
@@ -238,6 +351,139 @@ export function ESGForm() {
   const handleSave = async () => {
     setIsSaving(true);
     setError("");
+
+    // Validate all fields before saving
+    const newValidationErrors: ValidationState = {};
+    let hasErrors = false;
+    let errorMessages: string[] = [];
+    
+    // Define field labels for better error messages
+    const fieldLabels: Record<keyof ESGMetrics, string> = {
+      totalElectricityConsumption: "Total Electricity Consumption",
+      renewableElectricityConsumption: "Renewable Electricity",
+      totalFuelConsumption: "Total Fuel Consumption",
+      carbonEmissions: "Carbon Emissions",
+      totalEmployees: "Total Employees",
+      femaleEmployees: "Female Employees",
+      averageTrainingHours: "Average Training Hours",
+      communityInvestmentSpend: "Community Investment",
+      independentBoardMembers: "Independent Board Members",
+      hasDataPrivacyPolicy: "Data Privacy Policy",
+      totalRevenue: "Total Revenue"
+    };
+
+    // Required fields check with categories
+    const requiredFields: (keyof ESGMetrics)[] = [
+      "totalElectricityConsumption",
+      "totalEmployees",
+      "totalRevenue"
+    ];
+
+    // Check required fields first with categorized errors
+    const missingFields: { environmental: string[], social: string[], governance: string[] } = {
+      environmental: [],
+      social: [],
+      governance: []
+    };
+
+    requiredFields.forEach(field => {
+      if (!metrics[field]) {
+        newValidationErrors[field] = "This field is required";
+        
+        // Categorize missing fields
+        if (["totalElectricityConsumption", "renewableElectricityConsumption", "totalFuelConsumption", "carbonEmissions"].includes(field)) {
+          missingFields.environmental.push(fieldLabels[field]);
+        } else if (["totalEmployees", "femaleEmployees", "averageTrainingHours", "communityInvestmentSpend"].includes(field)) {
+          missingFields.social.push(fieldLabels[field]);
+        } else {
+          missingFields.governance.push(fieldLabels[field]);
+        }
+        
+        hasErrors = true;
+      }
+    });
+
+    // Validate all filled fields with detailed error tracking
+    const validationIssues = {
+      environmental: [] as string[],
+      social: [] as string[],
+      governance: [] as string[],
+      relationships: [] as string[]
+    };
+
+    Object.entries(metrics).forEach(([field, value]) => {
+      // Skip autoCalculated field as it's not a direct input field
+      if (field === 'autoCalculated') return;
+      
+      if (value !== undefined && value !== "") {
+        const error = validateField(field as keyof ESGMetrics, value as number | string);
+        if (error) {
+          newValidationErrors[field] = error;
+          const fieldName = fieldLabels[field as keyof ESGMetrics];
+          
+          // Categorize validation errors
+          if (["totalElectricityConsumption", "renewableElectricityConsumption", "totalFuelConsumption", "carbonEmissions"].includes(field)) {
+            validationIssues.environmental.push(error);
+          } else if (["totalEmployees", "femaleEmployees", "averageTrainingHours", "communityInvestmentSpend"].includes(field)) {
+            validationIssues.social.push(error);
+          } else {
+            validationIssues.governance.push(error);
+          }
+
+          // Track relationship errors separately
+          if (error.includes("cannot exceed")) {
+            validationIssues.relationships.push(`${fieldName}: ${error}`);
+          }
+          
+          hasErrors = true;
+        }
+      }
+    });
+
+    if (hasErrors) {
+      setValidationErrors(newValidationErrors);
+      setIsSaving(false);
+      
+      // Detailed console logging
+      console.log("ESG Validation Summary:", {
+        missingRequiredFields: missingFields,
+        validationIssues: validationIssues,
+        allErrors: newValidationErrors
+      });
+
+      // Build a user-friendly error message
+      const errorSections: string[] = [];
+      
+      // Add missing required fields
+      if (missingFields.environmental.length > 0) {
+        errorSections.push(`Missing Environmental Data: ${missingFields.environmental.join(", ")}`);
+      }
+      if (missingFields.social.length > 0) {
+        errorSections.push(`Missing Social Data: ${missingFields.social.join(", ")}`);
+      }
+      if (missingFields.governance.length > 0) {
+        errorSections.push(`Missing Governance Data: ${missingFields.governance.join(", ")}`);
+      }
+
+      // Add validation issues
+      if (validationIssues.relationships.length > 0) {
+        errorSections.push(`Relationship Errors: ${validationIssues.relationships.join(", ")}`);
+      }
+      if (validationIssues.environmental.length > 0) {
+        errorSections.push(`Environmental Issues:\n- ${validationIssues.environmental.join("\n- ")}`);
+      }
+      if (validationIssues.social.length > 0) {
+        errorSections.push(`Social Issues:\n- ${validationIssues.social.join("\n- ")}`);
+      }
+      if (validationIssues.governance.length > 0) {
+        errorSections.push(`Governance Issues:\n- ${validationIssues.governance.join("\n- ")}`);
+      }
+
+      const errorSummary = `Please fix the following issues:\n${errorSections.join("\n")}`;
+      setError(errorSummary);
+      notify("Validation errors found. Check the form for details.", "error");
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -532,19 +778,30 @@ export function ESGForm() {
                     Total electricity consumption
                   </Label>
                   <div className="flex items-center gap-2">
-                    <Input
-                      id="totalElectricityConsumption"
-                      type="number"
-                      placeholder="Enter consumption"
-                      value={metrics.totalElectricityConsumption || ""}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "totalElectricityConsumption",
-                          Number.parseFloat(e.target.value)
-                        )
-                      }
-                      className="h-12 text-lg border-2 border-gray-300 focus:border-emerald-400 transition-colors"
-                    />
+                    <div className="flex-1">
+                      <Input
+                        id="totalElectricityConsumption"
+                        type="number"
+                        placeholder="Enter consumption"
+                        value={metrics.totalElectricityConsumption || ""}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "totalElectricityConsumption",
+                            Number.parseFloat(e.target.value)
+                          )
+                        }
+                        className={`h-12 text-lg border-2 transition-colors ${
+                          validationErrors.totalElectricityConsumption 
+                            ? "border-red-400 focus:border-red-500" 
+                            : "border-gray-300 focus:border-emerald-400"
+                        }`}
+                      />
+                      {validationErrors.totalElectricityConsumption && (
+                        <p className="text-sm text-red-600 mt-1">
+                          {validationErrors.totalElectricityConsumption}
+                        </p>
+                      )}
+                    </div>
                     <Badge variant="secondary" className="px-3 py-1">
                       kWh
                     </Badge>
@@ -1172,7 +1429,7 @@ export function ESGForm() {
                         Well Governed
                       </Badge>
                     </div>
-                    
+
                   </div>
                 </div>
               </div>
