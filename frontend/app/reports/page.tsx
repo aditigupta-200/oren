@@ -20,14 +20,11 @@ import {
   BarChart3,
   Download,
   TrendingUp,
-  TrendingDown,
   Activity,
   Calendar,
   Target,
   Zap,
-  Filter,
   RefreshCw,
-  Eye,
   FileText,
   PieChart,
   LineChart,
@@ -41,23 +38,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-interface AutoCalculated {
-  carbonIntensity: number;
-  renewableElectricityRatio: number;
-  diversityRatio: number;
-  communitySpendRatio: number;
-}
-
-interface ESGResponse {
-  id: string;
-  financialYear: number;
-  data: {
-    autoCalculated?: AutoCalculated;
-    [key: string]: unknown;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { ESGResponse } from "@/types/esg";
 
 interface MetricCard {
   title: string;

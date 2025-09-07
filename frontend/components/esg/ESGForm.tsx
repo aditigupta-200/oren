@@ -15,7 +15,7 @@ interface ESGFormProps {
 
 export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
   const [formData, setFormData] = useState<Partial<ESGInputData>>({
-    financialYear: new Date().getFullYear().toString(),
+    financialYear: new Date().getFullYear(),
     ...initialData,
   });
 
@@ -39,6 +39,26 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Environmental Metrics */}
+      <Card>
+        <CardHeader>
+          <CardTitle>General Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div>
+            <Label htmlFor="financialYear">Financial Year</Label>
+            <Input
+              id="financialYear"
+              type="number"
+              min={2000}
+              max={2100}
+              value={formData.financialYear || ""}
+              onChange={(e) => handleChange("financialYear", e.target.value)}
+              required
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Environmental Metrics</CardTitle>

@@ -1,6 +1,16 @@
-export interface ESGInputData {
+export interface ESGData {
+  autoCalculated?: {
+    carbonIntensity: number;
+    renewableElectricityRatio: number;
+    diversityRatio: number;
+    communitySpendRatio: number;
+  };
+  [key: string]: unknown;
+}
+
+export interface ESGInputData extends ESGData {
   id?: string;
-  financialYear: string;
+  financialYear: number;
   createdAt?: string;
   updatedAt?: string;
   
@@ -24,7 +34,7 @@ export interface ESGInputData {
 
 export interface ESGResponse {
   id: string;
-  financialYear: string;
+  financialYear: number;
   data: ESGInputData;
   createdAt: string;
   updatedAt: string;

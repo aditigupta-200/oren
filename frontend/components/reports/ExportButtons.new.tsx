@@ -8,14 +8,14 @@ import {
   max,
   sum,
   calculateTotalChange,
-  calculateMetricTrend,
-} from "@/utils/esgCalculations";
+} from "@/utils/export-calculations";
 
 interface AutoCalculated {
   carbonIntensity?: number;
   renewableElectricityRatio?: number;
   diversityRatio?: number;
   communitySpendRatio?: number;
+  [key: string]: number | undefined;
 }
 
 function isAutoCalculated(obj: unknown): obj is AutoCalculated {
@@ -31,7 +31,21 @@ function isAutoCalculated(obj: unknown): obj is AutoCalculated {
 
 interface ESGData {
   financialYear: number;
-  data: Record<string, unknown>;
+  data: {
+    autoCalculated?: AutoCalculated;
+    carbonEmissions?: number;
+    totalElectricityConsumption?: number;
+    renewableElectricityConsumption?: number;
+    totalFuelConsumption?: number;
+    totalEmployees?: number;
+    femaleEmployees?: number;
+    averageTrainingHours?: number;
+    communityInvestmentSpend?: number;
+    independentBoardMembers?: number;
+    hasDataPrivacyPolicy?: "Yes" | "No";
+    totalRevenue?: number;
+    [key: string]: unknown;
+  };
 }
 
 interface ExportButtonsProps {
@@ -351,14 +365,13 @@ export function ExportButtons({ responses, userName }: ExportButtonsProps) {
               nextYear.data.totalEmployees as number
             ),
             "Diversity Change (%)": calculatePercentageChange(
-              currentYear.data.femaleEmployees &&
-                currentYear.data.totalEmployees
-                ? (((currentYear.data.femaleEmployees as number) /
-                    currentYear.data.totalEmployees) as number) * 100
+              currentYear.data.femaleEmployees !== undefined && currentYear.data.totalEmployees !== undefined
+                ? ((currentYear.data.femaleEmployees || 0) /
+                    (currentYear.data.totalEmployees || 1)) * 100
                 : null,
-              nextYear.data.femaleEmployees && nextYear.data.totalEmployees
-                ? (((nextYear.data.femaleEmployees as number) /
-                    nextYear.data.totalEmployees) as number) * 100
+              nextYear.data.femaleEmployees !== undefined && nextYear.data.totalEmployees !== undefined
+                ? ((nextYear.data.femaleEmployees || 0) /
+                    (nextYear.data.totalEmployees || 1)) * 100
                 : null
             ),
 
@@ -386,7 +399,7 @@ export function ExportButtons({ responses, userName }: ExportButtonsProps) {
             ),
             "Peak Renewable Ratio (%)": max(
               responses.map((r) =>
-                isAutoCalculated(r.data.autoCalculated)
+                isAutoCalculated(r.data.autoCalculated) && r.data.autoCalculated.renewableElectricityRatio !== undefined
                   ? r.data.autoCalculated.renewableElectricityRatio
                   : null
               )
