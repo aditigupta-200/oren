@@ -576,7 +576,7 @@ export default function ReportsPage() {
                       <TrendingUp className="h-5 w-5 text-green-600" />
                       Key Insights & Recommendations
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-gray-600">
                       AI-powered analysis of your ESG performance
                     </CardDescription>
                   </CardHeader>
@@ -595,45 +595,95 @@ export default function ReportsPage() {
                         return (
                           <div
                             key={index}
-                            className={`p-4 bg-gradient-to-r from-${color}-50 to-${
+                            className={`p-4 bg-gradient-to-r ${
                               color === "green"
-                                ? "emerald"
+                                ? "from-green-50 to-emerald-50 border-green-500"
                                 : color === "blue"
-                                ? "cyan"
+                                ? "from-blue-50 to-cyan-50 border-blue-500"
                                 : color === "purple"
-                                ? "pink"
-                                : "yellow"
-                            }-50 rounded-xl border-l-4 border-${color}-500 animate-slide-right`}
+                                ? "from-purple-50 to-pink-50 border-purple-500"
+                                : "from-amber-50 to-yellow-50 border-amber-500"
+                            } rounded-xl border-l-4 animate-slide-right`}
                             style={{ animationDelay: `${index * 200}ms` }}
                           >
                             <div className="flex items-start gap-3">
                               {insight.type === "achievement" && (
                                 <Award
-                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                  className={`h-5 w-5 ${
+                                    color === "green"
+                                      ? "text-green-600"
+                                      : color === "blue"
+                                      ? "text-blue-600"
+                                      : color === "purple"
+                                      ? "text-purple-600"
+                                      : "text-amber-600"
+                                  } mt-0.5`}
                                 />
                               )}
                               {insight.type === "improvement" && (
                                 <TrendingUp
-                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                  className={`h-5 w-5 ${
+                                    color === "green"
+                                      ? "text-green-600"
+                                      : color === "blue"
+                                      ? "text-blue-600"
+                                      : color === "purple"
+                                      ? "text-purple-600"
+                                      : "text-amber-600"
+                                  } mt-0.5`}
                                 />
                               )}
                               {insight.type === "trend" && (
                                 <Activity
-                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                  className={`h-5 w-5 ${
+                                    color === "green"
+                                      ? "text-green-600"
+                                      : color === "blue"
+                                      ? "text-blue-600"
+                                      : color === "purple"
+                                      ? "text-purple-600"
+                                      : "text-amber-600"
+                                  } mt-0.5`}
                                 />
                               )}
                               <div>
                                 <h4
-                                  className={`font-semibold text-${color}-900`}
+                                  className={`font-semibold ${
+                                    color === "green"
+                                      ? "text-green-900"
+                                      : color === "blue"
+                                      ? "text-blue-900"
+                                      : color === "purple"
+                                      ? "text-purple-900"
+                                      : "text-amber-900"
+                                  }`}
                                 >
                                   {insight.title}
                                 </h4>
-                                <p className={`text-${color}-700 text-sm`}>
+                                <p
+                                  className={`${
+                                    color === "green"
+                                      ? "text-green-700"
+                                      : color === "blue"
+                                      ? "text-blue-700"
+                                      : color === "purple"
+                                      ? "text-purple-700"
+                                      : "text-amber-700"
+                                  } text-sm`}
+                                >
                                   {insight.message}
                                 </p>
                                 {insight.recommendation && (
                                   <p
-                                    className={`text-${color}-600 text-sm mt-2 italic`}
+                                    className={`${
+                                      color === "green"
+                                        ? "text-green-600"
+                                        : color === "blue"
+                                        ? "text-blue-600"
+                                        : color === "purple"
+                                        ? "text-purple-600"
+                                        : "text-amber-600"
+                                    } text-sm mt-2 italic`}
                                   >
                                     Recommendation: {insight.recommendation}
                                   </p>
