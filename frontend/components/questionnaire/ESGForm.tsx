@@ -384,6 +384,7 @@ export function ESGForm() {
       independentBoardMembers: "Independent Board Members",
       hasDataPrivacyPolicy: "Data Privacy Policy",
       totalRevenue: "Total Revenue",
+      autoCalculated: "Auto Calculated",
     };
 
     // Required fields check with categories
