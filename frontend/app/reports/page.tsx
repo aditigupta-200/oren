@@ -43,7 +43,12 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { ESGResponse, CalculatedMetrics, ESGScores } from "@/types/esg";
+import {
+  ESGResponse,
+  CalculatedMetrics,
+  ESGScores,
+  Insight,
+} from "@/types/esg";
 
 interface MetricCard {
   title: string;
@@ -68,7 +73,7 @@ export default function ReportsPage() {
   const [calculatedMetrics, setCalculatedMetrics] =
     useState<CalculatedMetrics | null>(null);
   const [scores, setScores] = useState<ESGScores | null>(null);
-  const [insights, setInsights] = useState<any[]>([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -583,8 +588,10 @@ export default function ReportsPage() {
                           achievement: "green",
                           improvement: "blue",
                           trend: "purple",
-                        };
-                        const color = colors[insight.type] || "amber";
+                        } as const;
+                        const color =
+                          colors[insight.type as keyof typeof colors] ||
+                          "amber";
 
                         return (
                           <div
