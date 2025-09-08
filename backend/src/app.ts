@@ -17,7 +17,7 @@ const app = express()
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "https://oren-five.vercel.app/",
+    origin: process.env.FRONTEND_URL || "https://oren-five.vercel.app",
     credentials: true,
   }),
 )
