@@ -111,13 +111,7 @@ export function Navbar() {
                   </div>
                   <div className="p-2 bg-white">
                     <DropdownMenuItem asChild>
-                      <Link
-                        href="/profile"
-                        className="flex items-center px-3 py-2.5 rounded-md hover:bg-gray-50 text-gray-700 hover:text-gray-900 text-sm font-medium w-full"
-                      >
-                        <User className="mr-3 h-4 w-4" />
-                        Profile
-                      </Link>
+                      
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={logout}
