@@ -120,27 +120,44 @@ export function QuestionnaireHistory() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-green-600" />
-          Questionnaire History
-        </CardTitle>
-        <CardDescription>
-          View and manage your ESG responses across different financial years
-        </CardDescription>
+    <Card className="bg-white">
+      <CardHeader className="border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-xl text-gray-900">
+              <Calendar className="h-5 w-5 text-teal-600" />
+              Assessment History
+            </CardTitle>
+            <CardDescription className="text-gray-600 mt-1">
+              View and manage your ESG responses across different financial
+              years
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         {error && (
           <Alert className="mb-4">
             {typeof error === "string" ? error : "An error occurred"}
           </Alert>
         )}
         {responses.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">No ESG responses found</p>
-            <Button asChild className="btn-primary">
-              <Link href="/questionnaire">Create Your First Response</Link>
+          <div className="text-center py-12">
+            <div className="p-4 bg-teal-50 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <Calendar className="h-8 w-8 text-teal-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No Assessments Found
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Start tracking your ESG performance by creating your first
+              assessment
+            </p>
+            <Button
+              asChild
+              className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white hover:from-teal-600 hover:to-emerald-600 transition-all"
+            >
+              <Link href="/questionnaire">Create Your First Assessment</Link>
             </Button>
           </div>
         ) : (
@@ -148,23 +165,28 @@ export function QuestionnaireHistory() {
             {responses.map((response) => (
               <div
                 key={response.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-200"
               >
                 <div className="flex items-center gap-4">
+                  <div className="p-3 bg-teal-50 rounded-lg">
+                    <Calendar className="h-5 w-5 text-teal-600" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg">
-                      {response.financialYear}
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      FY {response.financialYear}
                     </h3>
                     <p className="text-sm text-gray-600">
                       Last updated: {formatDate(response.updatedAt)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge>{getCompletionScore(response.data)}% Complete</Badge>
+                    <Badge className="bg-teal-100 text-teal-700 px-3 py-1">
+                      {getCompletionScore(response.data)}% Complete
+                    </Badge>
                     {typeof response.data.autoCalculated !== "undefined" && (
                       <Badge
                         variant="secondary"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1"
                       >
                         <TrendingUp className="h-3 w-3" />
                         Auto-calculated
@@ -174,19 +196,22 @@ export function QuestionnaireHistory() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link
-                      href={`/questionnaire?year=${response.financialYear}`}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-2 border-teal-200 hover:border-teal-300 hover:bg-teal-50 transition-colors"
+                    asChild
+                  >
+                    <Link href={`/assessment/${response.financialYear}`}>
+                      <Eye className="h-4 w-4 mr-1 text-teal-600" />
+                      View Details
                     </Link>
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => deleteResponse(response.financialYear)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="border-2 border-red-200 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

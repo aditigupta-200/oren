@@ -155,8 +155,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -190,11 +188,47 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+interface ESGResponseData {
+  totalElectricityConsumption?: number;
+  renewableElectricityConsumption?: number;
+  totalFuelConsumption?: number;
+  carbonEmissions?: number;
+  totalEmployees?: number;
+  femaleEmployees?: number;
+  averageTrainingHours?: number;
+  communityInvestmentSpend?: number;
+  independentBoardMembers?: number;
+  hasDataPrivacyPolicy?: boolean;
+  totalRevenue?: number;
+  autoCalculated?: boolean;
+  [key: string]: number | boolean | undefined; // More specific index signature
+}
+
+interface ESGResponse {
+  id: string;
+  userId: string;
+  financialYear: number;
+  data: ESGResponseData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ESGMetrics {
+  carbonIntensity: { value: number; trend: "up" | "down" | "none" };
+  renewableEnergy: { value: number; trend: "up" | "down" | "none" };
+  diversityRatio: { value: number; trend: "up" | "down" | "none" };
+  trainingHours: { value: number; trend: "up" | "down" | "none" };
+  boardIndependence: { value: number; trend: "up" | "down" | "none" };
+  policyCompliance: { value: number; trend: "up" | "down" | "none" };
+}
+
 interface DashboardStats {
   totalResponses: number;
   completionRate: number;
   latestYear: number;
   lastUpdated: string;
+  esgScore: string;
+  metrics: ESGMetrics;
 }
 
 export default function DashboardPage() {
@@ -205,6 +239,15 @@ export default function DashboardPage() {
     completionRate: 0,
     latestYear: new Date().getFullYear(),
     lastUpdated: new Date().toISOString(),
+    esgScore: "N/A",
+    metrics: {
+      carbonIntensity: { value: 0, trend: "none" },
+      renewableEnergy: { value: 0, trend: "none" },
+      diversityRatio: { value: 0, trend: "none" },
+      trainingHours: { value: 0, trend: "none" },
+      boardIndependence: { value: 0, trend: "none" },
+      policyCompliance: { value: 0, trend: "none" },
+    },
   });
 
   useEffect(() => {
@@ -214,10 +257,266 @@ export default function DashboardPage() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if (user) {
-      // Load dashboard stats here
-      // This would typically fetch from your API
-    }
+    const loadDashboardStats = async () => {
+      if (user) {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(
+            `${
+              process.env.NEXT_PUBLIC_API_URL ||
+              "https://oren-nror.onrender.com"
+            }/api/responses`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to load responses");
+          }
+
+          const data = await response.json();
+          const responses = data.responses || [];
+
+          // Calculate stats
+          const totalResponses = responses.length;
+
+          // Calculate average completion rate
+          const completionRates = responses.map((response: ESGResponse) => {
+            const totalFields = 11; // Total number of input fields
+            const filledFields = Object.keys(response.data).filter(
+              (key) =>
+                key !== "autoCalculated" &&
+                response.data[key] !== undefined &&
+                response.data[key] !== null
+            ).length;
+            return (filledFields / totalFields) * 100;
+          });
+          const averageCompletion = completionRates.length
+            ? Math.round(
+                completionRates.reduce((a: number, b: number) => a + b, 0) /
+                  completionRates.length
+              )
+            : 0;
+
+          // Get latest year
+          const latestYear = responses.length
+            ? Math.max(...responses.map((r: ESGResponse) => r.financialYear))
+            : new Date().getFullYear();
+
+          // Calculate ESG Score based on latest response
+          const latestResponse = responses.find(
+            (r: ESGResponse) => r.financialYear === latestYear
+          );
+          let esgScore = "N/A";
+          if (latestResponse) {
+            const data = latestResponse.data;
+            // Simple scoring example - can be made more sophisticated
+            const sustainabilityScore = data.renewableElectricityConsumption
+              ? (data.renewableElectricityConsumption /
+                  data.totalElectricityConsumption) *
+                100
+              : 0;
+            const diversityScore = data.femaleEmployees
+              ? (data.femaleEmployees / data.totalEmployees) * 100
+              : 0;
+            const governanceScore = data.independentBoardMembers
+              ? data.independentBoardMembers * 10
+              : 0;
+
+            const totalScore =
+              (sustainabilityScore + diversityScore + governanceScore) / 3;
+
+            // Convert score to letter grade
+            if (totalScore >= 90) esgScore = "A+";
+            else if (totalScore >= 80) esgScore = "A";
+            else if (totalScore >= 70) esgScore = "B+";
+            else if (totalScore >= 60) esgScore = "B";
+            else if (totalScore >= 50) esgScore = "C+";
+            else esgScore = "C";
+          }
+
+          // Calculate metrics
+          const calculateMetrics = (
+            currentResponse: ESGResponse,
+            previousResponse?: ESGResponse
+          ) => {
+            const current = currentResponse.data;
+            const previous = previousResponse?.data;
+
+            // Carbon Intensity (CO2 emissions per revenue) - Lower is better
+            const rawCarbonIntensity =
+              current.carbonEmissions && current.totalRevenue
+                ? current.carbonEmissions / current.totalRevenue
+                : 0;
+            const previousRawCarbonIntensity =
+              previous?.carbonEmissions && previous?.totalRevenue
+                ? previous.carbonEmissions / previous.totalRevenue
+                : 0;
+            // Convert to a 0-100 scale where lower is better
+            const carbonIntensity = Math.max(
+              0,
+              Math.min(100, (1 - rawCarbonIntensity) * 100)
+            );
+            const previousCarbonIntensity = Math.max(
+              0,
+              Math.min(100, (1 - previousRawCarbonIntensity) * 100)
+            );
+
+            // Renewable Energy Percentage (already 0-100)
+            const renewableEnergy =
+              current.renewableElectricityConsumption &&
+              current.totalElectricityConsumption
+                ? Math.min(
+                    100,
+                    (current.renewableElectricityConsumption /
+                      current.totalElectricityConsumption) *
+                      100
+                  )
+                : 0;
+            const previousRenewableEnergy =
+              previous?.renewableElectricityConsumption &&
+              previous?.totalElectricityConsumption
+                ? Math.min(
+                    100,
+                    (previous.renewableElectricityConsumption /
+                      previous.totalElectricityConsumption) *
+                      100
+                  )
+                : 0;
+
+            // Diversity Ratio (should be 0-100)
+            const diversityRatio =
+              current.femaleEmployees && current.totalEmployees
+                ? Math.min(
+                    100,
+                    (current.femaleEmployees / current.totalEmployees) * 100
+                  )
+                : 0;
+            const previousDiversityRatio =
+              previous?.femaleEmployees && previous?.totalEmployees
+                ? Math.min(
+                    100,
+                    (previous.femaleEmployees / previous.totalEmployees) * 100
+                  )
+                : 0;
+
+            // Training Hours - Convert to a percentage based on target
+            const targetTrainingHours = 40; // Standard annual training hours target
+            const trainingHoursPercent = current.averageTrainingHours
+              ? Math.min(
+                  100,
+                  (current.averageTrainingHours / targetTrainingHours) * 100
+                )
+              : 0;
+            const previousTrainingHoursPercent = previous?.averageTrainingHours
+              ? Math.min(
+                  100,
+                  (previous.averageTrainingHours / targetTrainingHours) * 100
+                )
+              : 0;
+            const trainingHours = current.averageTrainingHours || 0;
+            const previousTrainingHours = previous?.averageTrainingHours || 0;
+
+            // Board Independence (should be 0-100)
+            const boardIndependence = current.independentBoardMembers
+              ? Math.min(100, current.independentBoardMembers * 10) // Assuming scale of 0-10
+              : 0;
+            const previousBoardIndependence = previous?.independentBoardMembers
+              ? Math.min(100, previous.independentBoardMembers * 10)
+              : 0;
+
+            // Policy Compliance
+            const policyCompliance = current.hasDataPrivacyPolicy ? 100 : 0;
+            const previousPolicyCompliance = previous?.hasDataPrivacyPolicy
+              ? 100
+              : 0;
+
+            return {
+              carbonIntensity: {
+                value: Math.round(carbonIntensity),
+                trend:
+                  carbonIntensity < previousCarbonIntensity
+                    ? ("down" as const)
+                    : carbonIntensity > previousCarbonIntensity
+                    ? ("up" as const)
+                    : ("none" as const),
+              },
+              renewableEnergy: {
+                value: Math.round(renewableEnergy),
+                trend:
+                  renewableEnergy > previousRenewableEnergy
+                    ? ("up" as const)
+                    : renewableEnergy < previousRenewableEnergy
+                    ? ("down" as const)
+                    : ("none" as const),
+              },
+              diversityRatio: {
+                value: Math.round(diversityRatio),
+                trend:
+                  diversityRatio > previousDiversityRatio
+                    ? ("up" as const)
+                    : diversityRatio < previousDiversityRatio
+                    ? ("down" as const)
+                    : ("none" as const),
+              },
+              trainingHours: {
+                value: Math.round(trainingHours),
+                trend:
+                  trainingHours > previousTrainingHours
+                    ? ("up" as const)
+                    : trainingHours < previousTrainingHours
+                    ? ("down" as const)
+                    : ("none" as const),
+              },
+              boardIndependence: {
+                value: Math.round(boardIndependence),
+                trend:
+                  boardIndependence > previousBoardIndependence
+                    ? ("up" as const)
+                    : boardIndependence < previousBoardIndependence
+                    ? ("down" as const)
+                    : ("none" as const),
+              },
+              policyCompliance: {
+                value: policyCompliance,
+                trend:
+                  policyCompliance > previousPolicyCompliance
+                    ? ("up" as const)
+                    : policyCompliance < previousPolicyCompliance
+                    ? ("down" as const)
+                    : ("none" as const),
+              },
+            };
+          };
+
+          // Get current and previous responses for trend calculation
+          const sortedResponses = responses.sort(
+            (a: ESGResponse, b: ESGResponse) =>
+              b.financialYear - a.financialYear
+          );
+          const currentResponse = sortedResponses[0];
+          const previousResponse = sortedResponses[1];
+
+          const metrics = calculateMetrics(currentResponse, previousResponse);
+
+          setStats({
+            totalResponses,
+            completionRate: averageCompletion,
+            latestYear,
+            lastUpdated: new Date().toISOString(),
+            esgScore,
+            metrics,
+          });
+        } catch (error) {
+          console.error("Error loading dashboard stats:", error);
+        }
+      }
+    };
+
+    loadDashboardStats();
   }, [user]);
 
   if (loading) {
@@ -298,16 +597,6 @@ export default function DashboardPage() {
                       View Analytics
                     </Link>
                   </Button>
-                  <Button
-                    variant="outline"
-                    asChild
-                    className="border-2 border-teal-200 hover:border-teal-300 hover:bg-teal-50 interactive-hover"
-                  >
-                    <Link href="/benchmarks">
-                      <Target className="mr-2 h-4 w-4" />
-                      Benchmarks
-                    </Link>
-                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -344,10 +633,11 @@ export default function DashboardPage() {
                 <div className="text-3xl font-bold text-gray-900 animate-scale-in animate-delay-400">
                   {stats.completionRate}%
                 </div>
-                <div
-                  className="progress-bar mt-2"
-                  style={{ width: `${stats.completionRate}%` }}
-                ></div>
+                <div className="h-2 w-full bg-gray-100 rounded-full mt-2">
+                  <div
+                    className={`h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500 w-[${stats.completionRate}%]`}
+                  />
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Average data quality
                 </p>
@@ -418,7 +708,12 @@ export default function DashboardPage() {
                       Carbon Intensity
                     </span>
                     <span className="font-semibold text-emerald-600">
-                      ↓ 15%
+                      {stats.metrics.carbonIntensity.trend === "down"
+                        ? "↓"
+                        : stats.metrics.carbonIntensity.trend === "up"
+                        ? "↑"
+                        : "→"}{" "}
+                      {Math.min(stats.metrics.carbonIntensity.value, 100)}%
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -426,11 +721,21 @@ export default function DashboardPage() {
                       Renewable Energy
                     </span>
                     <span className="font-semibold text-emerald-600">
-                      ↑ 23%
+                      {stats.metrics.renewableEnergy.trend === "up"
+                        ? "↑"
+                        : stats.metrics.renewableEnergy.trend === "down"
+                        ? "↓"
+                        : "→"}{" "}
+                      {stats.metrics.renewableEnergy.value}%
                     </span>
                   </div>
-                  <div className="progress-bar">
-                    <div className="w-3/4 h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
+                  <div className="h-2 w-full bg-gray-100 rounded-full">
+                    <div
+                      className={`h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500 w-[${Math.min(
+                        stats.metrics.renewableEnergy.value,
+                        100
+                      )}%]`}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -458,16 +763,35 @@ export default function DashboardPage() {
                     <span className="text-sm text-gray-600">
                       Diversity Ratio
                     </span>
-                    <span className="font-semibold text-blue-600">↑ 8%</span>
+                    <span className="font-semibold text-blue-600">
+                      {stats.metrics.diversityRatio.trend === "up"
+                        ? "↑"
+                        : stats.metrics.diversityRatio.trend === "down"
+                        ? "↓"
+                        : "→"}{" "}
+                      {stats.metrics.diversityRatio.value}%
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">
                       Training Hours
                     </span>
-                    <span className="font-semibold text-blue-600">↑ 32%</span>
+                    <span className="font-semibold text-blue-600">
+                      {stats.metrics.trainingHours.trend === "up"
+                        ? "↑"
+                        : stats.metrics.trainingHours.trend === "down"
+                        ? "↓"
+                        : "→"}{" "}
+                      {stats.metrics.trainingHours.value}h
+                    </span>
                   </div>
-                  <div className="progress-bar">
-                    <div className="w-4/5 h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
+                  <div className="h-2 w-full bg-gray-100 rounded-full">
+                    <div
+                      className={`h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-500 w-[${Math.min(
+                        stats.metrics.diversityRatio.value,
+                        100
+                      )}%]`}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -495,18 +819,31 @@ export default function DashboardPage() {
                     <span className="text-sm text-gray-600">
                       Board Independence
                     </span>
-                    <span className="font-semibold text-purple-600">85%</span>
+                    <span className="font-semibold text-purple-600">
+                      {stats.metrics.boardIndependence.trend === "up"
+                        ? "↑"
+                        : stats.metrics.boardIndependence.trend === "down"
+                        ? "↓"
+                        : "→"}{" "}
+                      {Math.min(stats.metrics.boardIndependence.value, 100)}%
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">
                       Policy Compliance
                     </span>
                     <span className="font-semibold text-purple-600">
-                      ✓ 100%
+                      {stats.metrics.policyCompliance.value === 100 ? "✓" : "×"}{" "}
+                      {stats.metrics.policyCompliance.value}%
                     </span>
                   </div>
-                  <div className="progress-bar">
-                    <div className="w-5/6 h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  <div className="h-2 w-full bg-gray-100 rounded-full">
+                    <div
+                      className={`h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 w-[${Math.min(
+                        stats.metrics.boardIndependence.value,
+                        100
+                      )}%]`}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -530,7 +867,7 @@ export default function DashboardPage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto p-6 flex-col gap-3 border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 interactive-hover group"
+                    className="h-auto p-6 flex-col gap-3 border-2  border-emerald-300 bg-emerald-50 interactive-hover group"
                   >
                     <Link href="/questionnaire">
                       <div className="p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform">
@@ -550,7 +887,7 @@ export default function DashboardPage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto p-6 flex-col gap-3 border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 interactive-hover group"
+                    className="h-auto p-6 flex-col gap-3 border-2 border-blue-300 bg-blue-50 interactive-hover group"
                   >
                     <Link href="/reports">
                       <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform">
@@ -570,37 +907,17 @@ export default function DashboardPage() {
                   <Button
                     asChild
                     variant="outline"
-                    className="h-auto p-6 flex-col gap-3 border-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 interactive-hover group"
-                  >
-                    <Link href="/benchmarks">
-                      <div className="p-3 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform">
-                        <Target className="h-6 w-6 text-purple-600" />
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold text-gray-900">
-                          Benchmarks
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          Compare with peers
-                        </div>
-                      </div>
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="h-auto p-6 flex-col gap-3 border-2 border-amber-200 hover:border-amber-300 hover:bg-amber-50 interactive-hover group"
+                    className="h-auto p-6 flex-col gap-3 border-2 border-amber-300 bg-white hover:bg-amber-50 interactive-hover group"
                   >
                     <Link href="/reports">
                       <div className="p-3 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform">
                         <FileText className="h-6 w-6 text-amber-600" />
                       </div>
                       <div className="text-center">
-                        <div className="font-semibold text-gray-900">
+                        <div className="font-semibold text-amber-700">
                           Export Reports
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-amber-600">
                           Download PDFs & Excel
                         </div>
                       </div>
@@ -638,79 +955,6 @@ export default function DashboardPage() {
               <CardContent className="p-0">
                 <div className="p-6">
                   <QuestionnaireHistory />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recent Activity Feed */}
-          <div className="animate-slide-up animate-delay-700">
-            <Card className="glass-card enhanced-card border-0 shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <Activity className="h-6 w-6 text-indigo-500 animate-pulse" />
-                  Recent Activity
-                </CardTitle>
-                <CardDescription className="text-gray-600">
-                  Latest updates and achievements
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl animate-slide-right animate-delay-100">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">
-                        Carbon intensity improved by 15%
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Compared to last quarter
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500">2 days ago</span>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl animate-slide-right animate-delay-200">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Users className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">
-                        New diversity training program launched
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Targeting 500+ employees
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500">1 week ago</span>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl animate-slide-right animate-delay-300">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Shield className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-gray-900">
-                        Data privacy policy updated
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Enhanced GDPR compliance
-                      </p>
-                    </div>
-                    <span className="text-xs text-gray-500">2 weeks ago</span>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    className="w-full interactive-hover border-2 border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50"
-                  >
-                    <Activity className="mr-2 h-4 w-4" />
-                    View All Activity
-                  </Button>
                 </div>
               </CardContent>
             </Card>
