@@ -10,25 +10,27 @@ export const calculateMetrics = (data: ESGInputData): CalculatedMetrics => ({
 export const calculateESGScores = (data: ESGInputData, metrics: CalculatedMetrics): ESGScores => {
   // Environmental Score (0-100)
   const envScore = Math.min(100,
-    (metrics.renewableRatio / 50 * 50) + // Max 50 points for 50%+ renewable
-    (Math.max(0, (0.02 - metrics.carbonIntensity) / 0.02) * 50) // Max 50 points for low carbon
+    Math.min(metrics.renewableRatio, 100) * 0.5 + // 50% weight for renewable ratio
+    Math.min(Math.max(0, (1 - metrics.carbonIntensity / 0.01) * 100), 100) * 0.5 // 50% weight for carbon intensity
   );
 
   // Social Score (0-100)
   const socialScore = Math.min(100,
-    (Math.min(metrics.diversityRatio / 30, 1) * 40) + // Max 40 points for 30%+ diversity
-    (Math.min(metrics.communitySpendRatio * 20, 1) * 30) + // Max 30 points for community spend
-    (Math.min(data.averageTrainingHours / 40, 1) * 30) // Max 30 points for training
+    Math.min(metrics.diversityRatio, 50) * 2 * 0.4 + // 40% weight for diversity (up to 50%)
+    Math.min(metrics.communitySpendRatio * 10, 100) * 0.3 + // 30% weight for community spend
+    Math.min(data.averageTrainingHours * 2.5, 100) * 0.3 // 30% weight for training hours
   );
 
   // Governance Score (0-100)
   const govScore = Math.min(100,
-    data.independentBoardMembers + // Direct percentage
-    (data.hasDataPrivacyPolicy === "Yes" ? 25 : 0) // 25 bonus points for policy
+    Math.min(data.independentBoardMembers, 100) * 0.75 + // 75% weight for board independence
+    (data.hasDataPrivacyPolicy === "Yes" ? 25 : 0) // 25% weight for privacy policy
   );
 
   // Overall ESG Score (Weighted Average)
-  const overallScore = (envScore * 0.4) + (socialScore * 0.35) + (govScore * 0.25);
+  const overallScore = Math.min(100,
+    (envScore * 0.4) + (socialScore * 0.35) + (govScore * 0.25)
+  );
 
   return { envScore, socialScore, govScore, overallScore };
 };

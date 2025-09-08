@@ -15,6 +15,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import {
+  calculateMetrics,
+  calculateESGScores,
+  generateInsights,
+  prepareChartData,
+} from "@/utils/esg-calculations";
+import {
   Loader2,
   BarChart3,
   Download,
@@ -37,7 +43,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { ESGResponse } from "@/types/esg";
+import { ESGResponse, CalculatedMetrics, ESGScores } from "@/types/esg";
 
 interface MetricCard {
   title: string;
@@ -59,6 +65,10 @@ export default function ReportsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [selectedView, setSelectedView] = useState<ViewType>("overview");
+  const [calculatedMetrics, setCalculatedMetrics] =
+    useState<CalculatedMetrics | null>(null);
+  const [scores, setScores] = useState<ESGScores | null>(null);
+  const [insights, setInsights] = useState<any[]>([]);
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -91,7 +101,30 @@ export default function ReportsPage() {
       }
 
       const data = await response.json();
-      setResponses(data.responses || []);
+      const responses = data.responses || [];
+      setResponses(responses);
+
+      if (responses.length > 0) {
+        // Sort by year and get the most recent entry
+        const sortedData = [...responses].sort(
+          (a, b) =>
+            parseInt(b.financialYear.toString()) -
+            parseInt(a.financialYear.toString())
+        );
+
+        // Calculate metrics and scores
+        const metrics = calculateMetrics(sortedData[0].data);
+        setCalculatedMetrics(metrics);
+        setScores(calculateESGScores(sortedData[0].data, metrics));
+
+        // Generate insights
+        const newInsights = generateInsights(
+          sortedData[0].data,
+          metrics,
+          sortedData.map((d) => d.data)
+        );
+        setInsights(newInsights);
+      }
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message || "Failed to load responses");
@@ -110,58 +143,38 @@ export default function ReportsPage() {
   };
 
   const getMetricCards = (): MetricCard[] => {
-    if (responses.length === 0) return [];
-
-    const latestResponse = responses.reduce((latest, current) =>
-      current.financialYear > latest.financialYear ? current : latest
-    );
+    if (!calculatedMetrics || responses.length === 0) return [];
 
     return [
       {
         title: "Carbon Intensity",
-        value: latestResponse.data.autoCalculated?.carbonIntensity
-          ? `${Number(
-              latestResponse.data.autoCalculated.carbonIntensity
-            ).toFixed(6)} T CO2e/INR`
-          : "N/A",
+        value: `${calculatedMetrics.carbonIntensity.toFixed(6)} T CO2e/INR`,
         change: "↓ 15%",
-        changeType: "positive",
+        changeType: "positive" as const,
         icon: <Leaf className="h-5 w-5" />,
         color: "emerald",
       },
       {
         title: "Renewable Energy",
-        value: latestResponse.data.autoCalculated?.renewableElectricityRatio
-          ? `${Number(
-              latestResponse.data.autoCalculated.renewableElectricityRatio
-            ).toFixed(1)}%`
-          : "N/A",
+        value: `${calculatedMetrics.renewableRatio.toFixed(1)}%`,
         change: "↑ 23%",
-        changeType: "positive",
+        changeType: "positive" as const,
         icon: <Zap className="h-5 w-5" />,
         color: "yellow",
       },
       {
         title: "Diversity Ratio",
-        value: latestResponse.data.autoCalculated?.diversityRatio
-          ? `${Number(
-              latestResponse.data.autoCalculated.diversityRatio
-            ).toFixed(1)}%`
-          : "N/A",
+        value: `${calculatedMetrics.diversityRatio.toFixed(1)}%`,
         change: "↑ 8%",
-        changeType: "positive",
+        changeType: "positive" as const,
         icon: <Users className="h-5 w-5" />,
         color: "blue",
       },
       {
         title: "Community Investment",
-        value: latestResponse.data.autoCalculated?.communitySpendRatio
-          ? `${Number(
-              latestResponse.data.autoCalculated.communitySpendRatio
-            ).toFixed(2)}%`
-          : "N/A",
+        value: `${calculatedMetrics.communitySpendRatio.toFixed(2)}%`,
         change: "↑ 12%",
-        changeType: "positive",
+        changeType: "positive" as const,
         icon: <Globe className="h-5 w-5" />,
         color: "purple",
       },
@@ -258,59 +271,6 @@ export default function ReportsPage() {
               </Alert>
             </div>
           )}
-
-          {/* View Selector */}
-          <div className="animate-slide-up animate-delay-200">
-            <Card className="glass-card enhanced-card border-0 shadow-xl">
-              <CardContent className="p-6">
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    {
-                      key: "overview",
-                      label: "Overview",
-                      icon: <BarChart3 className="h-4 w-4" />,
-                    },
-                    {
-                      key: "environmental",
-                      label: "Environmental",
-                      icon: <Leaf className="h-4 w-4" />,
-                    },
-                    {
-                      key: "social",
-                      label: "Social",
-                      icon: <Users className="h-4 w-4" />,
-                    },
-                    {
-                      key: "governance",
-                      label: "Governance",
-                      icon: <Shield className="h-4 w-4" />,
-                    },
-                  ].map((view, index) => (
-                    <Button
-                      key={view.key}
-                      variant={
-                        selectedView === view.key ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => setSelectedView(view.key as ViewType)}
-                      className={`
-                        animate-scale-in transition-all duration-300
-                        ${
-                          selectedView === view.key
-                            ? "btn-gradient text-white shadow-lg"
-                            : "border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50"
-                        }
-                      `}
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      {view.icon}
-                      <span className="ml-2">{view.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {responses.length === 0 ? (
             <div className="animate-scale-in">
@@ -523,7 +483,7 @@ export default function ReportsPage() {
                 </Card>
 
                 <Card className="enhanced-card border-0 shadow-xl">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 text-black">
                     <CardTitle className="text-lg font-bold flex items-center gap-2">
                       <Award className="h-5 w-5 text-amber-600" />
                       ESG Score
@@ -533,25 +493,44 @@ export default function ReportsPage() {
                     <div className="space-y-4">
                       <div className="text-center">
                         <div className="text-4xl font-bold text-amber-600 animate-pulse-glow">
-                          A+
+                          {scores
+                            ? `${scores.overallScore.toFixed(0)}%`
+                            : "N/A"}
                         </div>
                         <p className="text-sm text-gray-600 mt-2">
                           Overall Rating
                         </p>
                       </div>
-                      <div className="flex justify-center">
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <div
-                              key={star}
-                              className="w-4 h-4 bg-amber-400 rounded-full animate-pulse"
-                              style={{ animationDelay: `${star * 100}ms` }}
-                            ></div>
-                          ))}
+                      {scores && (
+                        <div className="flex flex-col gap-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              Environmental
+                            </span>
+                            <span className="text-sm font-bold text-emerald-600">
+                              {scores.envScore.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              Social
+                            </span>
+                            <span className="text-sm font-bold text-blue-600">
+                              {scores.socialScore.toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">
+                              Governance
+                            </span>
+                            <span className="text-sm font-bold text-purple-600">
+                              {scores.govScore.toFixed(1)}%
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      )}
                       <p className="text-xs text-gray-500 text-center">
-                        Top performance tier
+                        ESG Performance Breakdown
                       </p>
                     </div>
                   </CardContent>
@@ -575,7 +554,6 @@ export default function ReportsPage() {
                           time
                         </CardDescription>
                       </div>
-                     
                     </div>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -600,139 +578,65 @@ export default function ReportsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-500 animate-slide-right">
-                        <div className="flex items-start gap-3">
-                          <TrendingUp className="h-5 w-5 text-green-600 mt-0.5" />
-                          <div>
-                            <h4 className="font-semibold text-green-900">
-                              Environmental Excellence
-                            </h4>
-                            <p className="text-green-700 text-sm">
-                              Your carbon intensity has improved by 15% compared
-                              to industry average. Continue investing in
-                              renewable energy initiatives.
-                            </p>
+                      {insights.map((insight, index) => {
+                        const colors = {
+                          achievement: "green",
+                          improvement: "blue",
+                          trend: "purple",
+                        };
+                        const color = colors[insight.type] || "amber";
+
+                        return (
+                          <div
+                            key={index}
+                            className={`p-4 bg-gradient-to-r from-${color}-50 to-${
+                              color === "green"
+                                ? "emerald"
+                                : color === "blue"
+                                ? "cyan"
+                                : color === "purple"
+                                ? "pink"
+                                : "yellow"
+                            }-50 rounded-xl border-l-4 border-${color}-500 animate-slide-right`}
+                            style={{ animationDelay: `${index * 200}ms` }}
+                          >
+                            <div className="flex items-start gap-3">
+                              {insight.type === "achievement" && (
+                                <Award
+                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                />
+                              )}
+                              {insight.type === "improvement" && (
+                                <TrendingUp
+                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                />
+                              )}
+                              {insight.type === "trend" && (
+                                <Activity
+                                  className={`h-5 w-5 text-${color}-600 mt-0.5`}
+                                />
+                              )}
+                              <div>
+                                <h4
+                                  className={`font-semibold text-${color}-900`}
+                                >
+                                  {insight.title}
+                                </h4>
+                                <p className={`text-${color}-700 text-sm`}>
+                                  {insight.message}
+                                </p>
+                                {insight.recommendation && (
+                                  <p
+                                    className={`text-${color}-600 text-sm mt-2 italic`}
+                                  >
+                                    Recommendation: {insight.recommendation}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border-l-4 border-blue-500 animate-slide-right animate-delay-200">
-                        <div className="flex items-start gap-3">
-                          <Users className="h-5 w-5 text-blue-600 mt-0.5" />
-                          <div>
-                            <h4 className="font-semibold text-blue-900">
-                              Social Impact Growth
-                            </h4>
-                            <p className="text-blue-700 text-sm">
-                              Diversity ratio shows positive trend. Consider
-                              expanding training programs to accelerate
-                              progress.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500 animate-slide-right animate-delay-500">
-                        <div className="flex items-start gap-3">
-                          <Shield className="h-5 w-5 text-purple-600 mt-0.5" />
-                          <div>
-                            <h4 className="font-semibold text-purple-900">
-                              Governance Strength
-                            </h4>
-                            <p className="text-purple-700 text-sm">
-                              Strong governance framework in place. Board
-                              independence exceeds best practices standards.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border-l-4 border-amber-500 animate-slide-right animate-delay-700">
-                        <div className="flex items-start gap-3">
-                          <Target className="h-5 w-5 text-amber-600 mt-0.5" />
-                          <div>
-                            <h4 className="font-semibold text-amber-900">
-                              Action Items
-                            </h4>
-                            <p className="text-amber-700 text-sm">
-                              Focus on increasing community investment ratio and
-                              implementing additional sustainability initiatives
-                              for Q4.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="enhanced-card border-0 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                      <Globe className="h-5 w-5 text-teal-600" />
-                      Industry Benchmarks
-                    </CardTitle>
-                    <CardDescription>
-                      Compare your performance with industry peers
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-6">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            Carbon Intensity
-                          </span>
-                          <span className="text-sm font-bold text-green-600">
-                            25% Better
-                          </span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="w-3/4 h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            Diversity Ratio
-                          </span>
-                          <span className="text-sm font-bold text-blue-600">
-                            12% Above
-                          </span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="w-3/5 h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            Renewable Energy
-                          </span>
-                          <span className="text-sm font-bold text-yellow-600">
-                            8% Above
-                          </span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="w-2/3 h-full bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full"></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-700">
-                            Governance Score
-                          </span>
-                          <span className="text-sm font-bold text-purple-600">
-                            Top 10%
-                          </span>
-                        </div>
-                        <div className="progress-bar">
-                          <div className="w-5/6 h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
-                        </div>
-                      </div>
+                        );
+                      })}
                     </div>
                   </CardContent>
                 </Card>
@@ -757,7 +661,7 @@ export default function ReportsPage() {
                       <Button
                         asChild
                         variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 interactive-hover group"
+                        className="h-auto p-6 flex-col gap-3 border-2 border-emerald-200 border-emerald-300 bg-emerald-50 interactive-hover group"
                       >
                         <a href="/questionnaire">
                           <div className="p-3 bg-emerald-100 rounded-xl group-hover:scale-110 transition-transform">
@@ -776,7 +680,7 @@ export default function ReportsPage() {
 
                       <Button
                         variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 interactive-hover group"
+                        className="h-auto p-6 flex-col gap-3 border-2 border-blue-200 border-blue-300 bg-blue-50 interactive-hover group"
                       >
                         <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform">
                           <Target className="h-6 w-6 text-blue-600" />
@@ -793,7 +697,7 @@ export default function ReportsPage() {
 
                       <Button
                         variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 interactive-hover group"
+                        className="h-auto p-6 flex-col gap-3 border-2 border-purple-200 border-purple-300 bg-purple-50 interactive-hover group"
                       >
                         <div className="p-3 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform">
                           <Globe className="h-6 w-6 text-purple-600" />
@@ -811,7 +715,7 @@ export default function ReportsPage() {
                       <Button
                         onClick={() => window.print()}
                         variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-amber-200 hover:border-amber-300 hover:bg-amber-50 interactive-hover group"
+                        className="h-auto p-6 flex-col gap-3 border-2 border-amber-200 hover:border-amber-300 bg-white hover:bg-amber-50 interactive-hover group"
                       >
                         <div className="p-3 bg-amber-100 rounded-xl group-hover:scale-110 transition-transform">
                           <Download className="h-6 w-6 text-amber-600" />

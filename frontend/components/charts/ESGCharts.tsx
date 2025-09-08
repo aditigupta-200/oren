@@ -804,7 +804,7 @@ export function ESGCharts({ responses }: ESGChartsProps) {
       {/* Chart Summary Statistics */}
       <Card className="enhanced-card animate-slide-up glass-card border-0 shadow-xl">
         <CardHeader>
-          <CardTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <CardTitle className="text-xl font-bold text-gray-200 flex items-center gap-2">
             <Activity className="h-5 w-5 text-indigo-600" />
             Performance Summary
           </CardTitle>
