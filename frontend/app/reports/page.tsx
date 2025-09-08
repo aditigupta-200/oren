@@ -686,40 +686,6 @@ export default function ReportsPage() {
                       </Button>
 
                       <Button
-                        variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-blue-200 border-blue-300 bg-blue-50 interactive-hover group"
-                      >
-                        <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform">
-                          <Target className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div className="text-center">
-                          <div className="font-semibold text-gray-900">
-                            Set Goals
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            Define ESG targets
-                          </div>
-                        </div>
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="h-auto p-6 flex-col gap-3 border-2 border-purple-200 border-purple-300 bg-purple-50 interactive-hover group"
-                      >
-                        <div className="p-3 bg-purple-100 rounded-xl group-hover:scale-110 transition-transform">
-                          <Globe className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div className="text-center">
-                          <div className="font-semibold text-gray-900">
-                            Benchmarks
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            Compare with peers
-                          </div>
-                        </div>
-                      </Button>
-
-                      <Button
                         onClick={() => window.print()}
                         variant="outline"
                         className="h-auto p-6 flex-col gap-3 border-2 border-amber-200 hover:border-amber-300 bg-white hover:bg-amber-50 interactive-hover group"

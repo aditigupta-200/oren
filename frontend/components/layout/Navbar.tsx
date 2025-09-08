@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User, BarChart3 } from "lucide-react";
+import { LogOut, User, Leaf } from "lucide-react";
 import Link from "next/link";
 
 export function Navbar() {
@@ -24,8 +24,10 @@ export function Navbar() {
               href="/dashboard"
               className="flex items-center gap-2 shrink-0"
             >
-              <BarChart3 className="h-7 w-7 text-green-600" />
-              <span className="text-lg font-bold text-green-600 whitespace-nowrap">
+              <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+                <Leaf className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent whitespace-nowrap">
                 ESG Platform
               </span>
             </Link>

@@ -26,8 +26,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("demo@esg-app.com");
-  const [password, setPassword] = useState("demo123456");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -138,11 +138,11 @@ export function LoginForm() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="Enter valid email id"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                      className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     />
                   </div>
                 </div>
@@ -159,11 +159,11 @@ export function LoginForm() {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
+                      placeholder="Enter valid password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="h-12 pl-4 pr-12 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                      className="h-12 pl-4 pr-12 rounded-xl border-2 border-gray-200 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     />
                     <button
                       type="button"

@@ -126,7 +126,7 @@ export function RegisterForm() {
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     required
                   />
                 </div>
@@ -142,10 +142,10 @@ export function RegisterForm() {
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter valid email id"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     required
                   />
                 </div>
@@ -161,10 +161,10 @@ export function RegisterForm() {
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Enter valid password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     required
                   />
                 </div>
@@ -180,10 +180,10 @@ export function RegisterForm() {
                   <Input
                     id="confirmPassword"
                     type="password"
-                    placeholder="Confirm your password"
+                    placeholder="Re-enter your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-gray-50/50 transition-all duration-200 focus:text-emerald-600"
+                    className="h-12 pl-4 pr-4 rounded-xl border-2 border-gray-300 focus:border-emerald-400 focus:ring-emerald-400 bg-white text-gray-900 placeholder:text-gray-500"
                     required
                   />
                 </div>
