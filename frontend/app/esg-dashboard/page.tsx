@@ -98,7 +98,7 @@ export default function ESGDashboardPage() {
       ? `${historicalData[historicalData.length - 1].financialYear} - ${
           historicalData[0].financialYear
         }`
-      : currentData.financialYear;
+      : currentData.financialYear.toString();
 
   const insights = generateInsights(
     currentData.data,
