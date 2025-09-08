@@ -120,16 +120,38 @@ npm run dev  # Runs on port 3000
 - Aditi Gupta
 
 ![alt text](<Screenshot 2025-09-09 002744.png>)
-![alt text](<Screenshot 2025-09-09 003633.png>)
-![alt text](<Screenshot 2025-09-09 003537.png>)
-![alt text](<Screenshot 2025-09-09 003441.png>)
-![alt text](<Screenshot 2025-09-09 003416.png>)
-![alt text](<Screenshot 2025-09-09 003350.png>)
-![alt text](<Screenshot 2025-09-09 003328.png>)
-![alt text](<Screenshot 2025-09-09 003304.png>)
-![alt text](<Screenshot 2025-09-09 003208.png>)
-![alt text](<Screenshot 2025-09-09 003122.png>)
-![alt text](<Screenshot 2025-09-09 003031.png>)
-![alt text](<Screenshot 2025-09-09 002924.png>)
-![alt text](<Screenshot 2025-09-09 002857.png>)
+
 ![alt text](<Screenshot 2025-09-09 002832.png>)
+
+![alt text](<Screenshot 2025-09-09 002857.png>)
+
+![alt text](<Screenshot 2025-09-09 002924.png>)
+
+![alt text](<Screenshot 2025-09-09 003031.png>)
+
+![alt text](<Screenshot 2025-09-09 003122.png>)
+
+![alt text](<Screenshot 2025-09-09 003208.png>)
+
+![alt text](<Screenshot 2025-09-09 003304.png>)
+
+![alt text](<Screenshot 2025-09-09 003328.png>)
+
+![alt text](<Screenshot 2025-09-09 003350.png>)
+
+![alt text](<Screenshot 2025-09-09 003416.png>)
+
+![alt text](<Screenshot 2025-09-09 003441.png>)
+
+![alt text](<Screenshot 2025-09-09 003537.png>)
+
+![alt text](<Screenshot 2025-09-09 003633.png>)
+
+
+
+
+
+
+
+
+
