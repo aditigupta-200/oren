@@ -575,32 +575,7 @@ export default function ReportsPage() {
                           time
                         </CardDescription>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-2 border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50"
-                        >
-                          <PieChart className="mr-2 h-4 w-4" />
-                          Pie View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50"
-                        >
-                          <BarChart2 className="mr-2 h-4 w-4" />
-                          Bar View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50"
-                        >
-                          <LineChart className="mr-2 h-4 w-4" />
-                          Line View
-                        </Button>
-                      </div>
+                     
                     </div>
                   </CardHeader>
                   <CardContent className="p-6">

@@ -700,34 +700,40 @@ export function ESGCharts({ responses }: ESGChartsProps) {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <ScatterChart
-              data={chartData.map((d) => ({
+            {(() => {
+              // ✅ Pre-calculate governance data with complianceScore + revenueGrowth
+              const governanceData = chartData.map((d) => ({
                 ...d,
                 complianceScore:
                   (d.independentBoard + d.hasDataPolicy * 100) / 2,
                 revenueGrowth: d.totalRevenue,
-              }))}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                type="number"
-                dataKey="complianceScore"
-                name="Compliance Score"
-                stroke="#64748b"
-              />
-              <YAxis
-                type="number"
-                dataKey="revenueGrowth"
-                name="Revenue"
-                stroke="#64748b"
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Scatter
-                name="Governance Performance"
-                data={chartData}
-                fill={COLORS.governance[0]}
-              />
-            </ScatterChart>
+              }));
+
+              return (
+                <ScatterChart data={governanceData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis
+                    type="number"
+                    dataKey="complianceScore"
+                    name="Compliance Score"
+                    stroke="#64748b"
+                    domain={[0, 100]} // ✅ keep it percentage scale
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="revenueGrowth"
+                    name="Revenue"
+                    stroke="#64748b"
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Scatter
+                    name="Governance Performance"
+                    data={governanceData} // ✅ enriched dataset
+                    fill={COLORS.governance[0]}
+                  />
+                </ScatterChart>
+              );
+            })()}
           </ResponsiveContainer>
         </CardContent>
       </Card>

@@ -162,7 +162,7 @@ export const prepareChartData = (
     trends: historicalData.map(year => {
       const metrics = calculateMetrics(year);
       return {
-        year: year.financialYear.toString(), // Convert number to string
+        year: year.financialYear, 
         carbonIntensity: metrics.carbonIntensity * 1000,
         renewableRatio: metrics.renewableRatio,
         diversityRatio: metrics.diversityRatio,

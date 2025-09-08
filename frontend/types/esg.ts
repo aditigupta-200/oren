@@ -95,7 +95,7 @@ export interface DonutChartData {
 }
 
 export interface TrendData {
-  year: string;
+  year: number;
   carbonIntensity: number;
   renewableRatio: number;
   diversityRatio: number;
