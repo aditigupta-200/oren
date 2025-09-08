@@ -732,11 +732,11 @@ export function ESGForm() {
         <div className="animate-fade-in">
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-black">
                 <Calendar className="h-6 w-6 text-gray-600" />
                 Assessment Configuration
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-black">
                 Set up your ESG assessment parameters and data collection period
               </CardDescription>
             </CardHeader>
@@ -745,7 +745,7 @@ export function ESGForm() {
                 <div className="space-y-4">
                   <Label
                     htmlFor="financialYear"
-                    className="text-lg font-semibold"
+                    className="text-lg font-semibold text-black"
                   >
                     Financial Year
                   </Label>
@@ -830,11 +830,11 @@ export function ESGForm() {
         <div className="animate-fade-in">
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-emerald-900">
                 <Leaf className="h-6 w-6 text-emerald-600" />
                 Environmental Metrics
               </CardTitle>
-              <CardDescription>
+              <CardDescription text-emerald-800>
                 Track your environmental impact and sustainability initiatives
               </CardDescription>
             </CardHeader>
@@ -843,7 +843,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up">
                   <Label
                     htmlFor="totalElectricityConsumption"
-                    className="font-semibold"
+                    className="font-semibold text-emerald-600"
                   >
                     Total electricity consumption
                   </Label>
@@ -872,11 +872,14 @@ export function ESGForm() {
                         </p>
                       )}
                     </div>
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-emerald-600"
+                    >
                       kWh
                     </Badge>
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 ">
                     Annual electricity consumption across all facilities
                   </p>
                 </div>
@@ -884,7 +887,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-100">
                   <Label
                     htmlFor="renewableElectricityConsumption"
-                    className="font-semibold"
+                    className="font-semibold text-emerald-600"
                   >
                     Renewable electricity consumption
                   </Label>
@@ -902,7 +905,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-emerald-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-emerald-600"
+                    >
                       kWh
                     </Badge>
                   </div>
@@ -914,7 +920,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-200">
                   <Label
                     htmlFor="totalFuelConsumption"
-                    className="font-semibold"
+                    className="font-semibold text-emerald-600"
                   >
                     Total fuel consumption
                   </Label>
@@ -932,7 +938,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-emerald-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-emerald-600"
+                    >
                       liters
                     </Badge>
                   </div>
@@ -942,7 +951,10 @@ export function ESGForm() {
                 </div>
 
                 <div className="space-y-2 animate-slide-up animate-delay-300">
-                  <Label htmlFor="carbonEmissions" className="font-semibold">
+                  <Label
+                    htmlFor="carbonEmissions"
+                    className="font-semibold text-emerald-600"
+                  >
                     Carbon emissions
                   </Label>
                   <div className="flex items-center gap-2">
@@ -959,7 +971,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-emerald-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-emerald-600"
+                    >
                       T CO2e
                     </Badge>
                   </div>
@@ -1021,18 +1036,21 @@ export function ESGForm() {
         <div className="animate-fade-in">
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-blue-900">
                 <Users className="h-6 w-6 text-blue-600" />
                 Social Impact Metrics
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-blue-800">
                 Measure your people-focused initiatives and community engagement
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2 animate-slide-up">
-                  <Label htmlFor="totalEmployees" className="font-semibold">
+                  <Label
+                    htmlFor="totalEmployees"
+                    className="font-semibold text-blue-600"
+                  >
                     Total number of employees
                   </Label>
                   <Input
@@ -1054,7 +1072,10 @@ export function ESGForm() {
                 </div>
 
                 <div className="space-y-2 animate-slide-up animate-delay-100">
-                  <Label htmlFor="femaleEmployees" className="font-semibold">
+                  <Label
+                    htmlFor="femaleEmployees"
+                    className="font-semibold text-blue-600"
+                  >
                     Number of female employees
                   </Label>
                   <Input
@@ -1078,7 +1099,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-200">
                   <Label
                     htmlFor="averageTrainingHours"
-                    className="font-semibold"
+                    className="font-semibold text-blue-600"
                   >
                     Average training hours per employee (per year)
                   </Label>
@@ -1103,7 +1124,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-300">
                   <Label
                     htmlFor="communityInvestmentSpend"
-                    className="font-semibold"
+                    className="font-semibold text-blue-600"
                   >
                     Community investment spend
                   </Label>
@@ -1121,7 +1142,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-blue-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-blue-600"
+                    >
                       INR
                     </Badge>
                   </div>
@@ -1179,11 +1203,11 @@ export function ESGForm() {
         <div className="animate-fade-in">
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-purple-900">
                 <Shield className="h-6 w-6 text-purple-600" />
                 Governance Standards
               </CardTitle>
-              <CardDescription>
+              <CardDescription text-purple-800>
                 Assess your organizational ethics, transparency, and
                 accountability measures
               </CardDescription>
@@ -1193,7 +1217,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up">
                   <Label
                     htmlFor="independentBoardMembers"
-                    className="font-semibold"
+                    className="font-semibold text-purple-600"
                   >
                     % of independent board members
                   </Label>
@@ -1213,7 +1237,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-purple-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-purple-600"
+                    >
                       %
                     </Badge>
                   </div>
@@ -1225,7 +1252,7 @@ export function ESGForm() {
                 <div className="space-y-2 animate-slide-up animate-delay-100">
                   <Label
                     htmlFor="hasDataPrivacyPolicy"
-                    className="font-semibold"
+                    className="font-semibold text-purple-600"
                   >
                     Does the company have a data privacy policy?
                   </Label>
@@ -1252,7 +1279,10 @@ export function ESGForm() {
                 </div>
 
                 <div className="md:col-span-2 space-y-2 animate-slide-up animate-delay-200">
-                  <Label htmlFor="totalRevenue" className="font-semibold">
+                  <Label
+                    htmlFor="totalRevenue"
+                    className="font-semibold text-purple-600"
+                  >
                     Total Revenue
                   </Label>
                   <div className="flex items-center gap-2">
@@ -1269,7 +1299,10 @@ export function ESGForm() {
                       }
                       className="h-12 text-lg border-2 border-gray-300 focus:border-purple-400 transition-colors"
                     />
-                    <Badge variant="secondary" className="px-3 py-1">
+                    <Badge
+                      variant="secondary"
+                      className="px-3 py-1 text-purple-600"
+                    >
                       INR
                     </Badge>
                   </div>
@@ -1327,11 +1360,11 @@ export function ESGForm() {
           {/* Auto-Calculated Metrics */}
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-amber-600">
                 <Calculator className="h-6 w-6 text-orange-600" />
                 Auto-Calculated Performance Indicators
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-amber-800">
                 AI-powered insights derived from your input data with real-time
                 calculations
               </CardDescription>
@@ -1425,11 +1458,11 @@ export function ESGForm() {
           {/* ESG Score Summary */}
           <Card className="glass-card enhanced-card border-0 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-2xl">
+              <CardTitle className="flex items-center gap-2 text-2xl text-black">
                 <BarChart3 className="h-6 w-6 text-indigo-600" />
                 ESG Performance Summary
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-800">
                 Your comprehensive sustainability score and recommendations
               </CardDescription>
             </CardHeader>
