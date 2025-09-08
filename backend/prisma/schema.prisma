@@ -42,22 +42,3 @@ model ESGResponse {
   @@index([financialYear])
   @@map("esg_responses")
 }
-
-// Optional: Audit log for tracking changes
-model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String   // CREATE, UPDATE, DELETE
-  entity    String   // User, ESGResponse
-  entityId  String
-  oldData   Json?
-  newData   Json?
-  timestamp DateTime @default(now())
-  ipAddress String?
-  userAgent String?
-
-  @@index([userId])
-  @@index([entity, entityId])
-  @@index([timestamp])
-  @@map("audit_logs")
-}
