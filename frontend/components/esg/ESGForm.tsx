@@ -41,11 +41,11 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
       {/* Environmental Metrics */}
       <Card>
         <CardHeader>
-          <CardTitle>General Information</CardTitle>
+          <CardTitle className="text-black">General Information</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div>
-            <Label htmlFor="financialYear">Financial Year</Label>
+            <Label htmlFor="financialYear" className="text-black">Financial Year</Label>
             <Input
               id="financialYear"
               type="number"
@@ -61,12 +61,12 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Environmental Metrics</CardTitle>
+          <CardTitle className="text-black">Environmental Metrics</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="totalElectricityConsumption">
+              <Label htmlFor="totalElectricityConsumption" className="text-black">
                 Total Electricity (kWh)
               </Label>
               <Input
@@ -80,7 +80,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="renewableElectricityConsumption">
+              <Label htmlFor="renewableElectricityConsumption" className="text-black">
                 Renewable Electricity (kWh)
               </Label>
               <Input
@@ -99,7 +99,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="totalFuelConsumption">
+              <Label htmlFor="totalFuelConsumption" className="text-black">
                 Fuel Consumption (liters)
               </Label>
               <Input
@@ -113,7 +113,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="carbonEmissions">Carbon Emissions (T CO2e)</Label>
+              <Label htmlFor="carbonEmissions" className="text-black">Carbon Emissions (T CO2e)</Label>
               <Input
                 id="carbonEmissions"
                 type="number"
@@ -131,12 +131,12 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
       {/* Social Metrics */}
       <Card>
         <CardHeader>
-          <CardTitle>Social Metrics</CardTitle>
+          <CardTitle className="text-black">Social Metrics</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="totalEmployees">Total Employees</Label>
+              <Label htmlFor="totalEmployees" className="text-black">Total Employees</Label>
               <Input
                 id="totalEmployees"
                 type="number"
@@ -146,7 +146,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="femaleEmployees">Female Employees</Label>
+              <Label htmlFor="femaleEmployees" className="text-black">Female Employees</Label>
               <Input
                 id="femaleEmployees"
                 type="number"
@@ -160,7 +160,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="averageTrainingHours">
+              <Label htmlFor="averageTrainingHours" className="text-black">
                 Training Hours per Employee
               </Label>
               <Input
@@ -174,7 +174,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="communityInvestmentSpend">
+              <Label htmlFor="communityInvestmentSpend" className="text-black">
                 Community Investment (INR)
               </Label>
               <Input
@@ -194,12 +194,12 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
       {/* Governance Metrics */}
       <Card>
         <CardHeader>
-          <CardTitle>Governance Metrics</CardTitle>
+          <CardTitle className="text-black">Governance Metrics</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="independentBoardMembers">
+              <Label htmlFor="independentBoardMembers" className="text-black">
                 Board Independence (%)
               </Label>
               <Input
@@ -215,7 +215,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="totalRevenue">Total Revenue (INR)</Label>
+              <Label htmlFor="totalRevenue" className="text-black">Total Revenue (INR)</Label>
               <Input
                 id="totalRevenue"
                 type="number"
@@ -233,7 +233,7 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
                 handleChange("hasDataPrivacyPolicy", checked ? "Yes" : "No")
               }
             />
-            <Label htmlFor="hasDataPrivacyPolicy">
+            <Label htmlFor="hasDataPrivacyPolicy" className="text-black">
               Has Data Privacy Policy
             </Label>
           </div>
