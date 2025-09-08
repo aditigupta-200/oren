@@ -45,7 +45,9 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
         </CardHeader>
         <CardContent className="grid gap-4">
           <div>
-            <Label htmlFor="financialYear" className="text-black">Financial Year</Label>
+            <Label htmlFor="financialYear" className="text-black">
+              Financial Year
+            </Label>
             <Input
               id="financialYear"
               type="number"
@@ -66,7 +68,10 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="totalElectricityConsumption" className="text-black">
+              <Label
+                htmlFor="totalElectricityConsumption"
+                className="text-black"
+              >
                 Total Electricity (kWh)
               </Label>
               <Input
@@ -80,7 +85,10 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="renewableElectricityConsumption" className="text-black">
+              <Label
+                htmlFor="renewableElectricityConsumption"
+                className="text-black"
+              >
                 Renewable Electricity (kWh)
               </Label>
               <Input
@@ -113,7 +121,9 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="carbonEmissions" className="text-black">Carbon Emissions (T CO2e)</Label>
+              <Label htmlFor="carbonEmissions" className="text-black">
+                Carbon Emissions (T CO2e)
+              </Label>
               <Input
                 id="carbonEmissions"
                 type="number"
@@ -136,7 +146,9 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
         <CardContent className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="totalEmployees" className="text-black">Total Employees</Label>
+              <Label htmlFor="totalEmployees" className="text-black">
+                Total Employees
+              </Label>
               <Input
                 id="totalEmployees"
                 type="number"
@@ -146,7 +158,9 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="femaleEmployees" className="text-black">Female Employees</Label>
+              <Label htmlFor="femaleEmployees" className="text-black">
+                Female Employees
+              </Label>
               <Input
                 id="femaleEmployees"
                 type="number"
@@ -215,7 +229,9 @@ export function ESGForm({ onSubmit, initialData = {} }: ESGFormProps) {
               />
             </div>
             <div>
-              <Label htmlFor="totalRevenue" className="text-black">Total Revenue (INR)</Label>
+              <Label htmlFor="totalRevenue" className="text-black">
+                Total Revenue (INR)
+              </Label>
               <Input
                 id="totalRevenue"
                 type="number"
