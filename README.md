@@ -4,7 +4,7 @@ A full-stack application for managing and tracking Environmental, Social, and Go
 
 ## Live Demo
 
-[Live Application](https://oren-seven.vercel.app)
+[Live Application](https://oren-five.vercel.app)
 
 ## Features
 
@@ -146,12 +146,3 @@ npm run dev  # Runs on port 3000
 ![alt text](<Screenshot 2025-09-09 003537.png>)
 
 ![alt text](<Screenshot 2025-09-09 003633.png>)
-
-
-
-
-
-
-
-
-
