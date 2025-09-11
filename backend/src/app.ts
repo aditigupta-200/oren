@@ -5,7 +5,6 @@ import morgan from "morgan"
 import dotenv from "dotenv"
 import authRoutes from "./routes/auth"
 import responseRoutes from "./routes/responses"
-import esgRoutes from "./routes/esg"
 import { errorHandler } from "./middleware/errorHandler"
 import { notFound } from "./middleware/notFound"
 
@@ -40,7 +39,6 @@ app.get("/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes)
 app.use("/api/responses", responseRoutes)
-app.use("/api/esg", esgRoutes)
 
 // Error handling
 app.use(notFound)
